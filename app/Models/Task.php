@@ -7,30 +7,42 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Project extends Model
+class Task extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'project_id',
+        'created_by',
+        'title',
         'description',
         'status',
-        'created_by',
-        'start_date',
-        'due_date',
+        'priority',
+        'due_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
-            'due_date'   => 'date',
+            'due_at' => 'datetime',
         ];
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function assignees(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('acknowledged_at')
+            ->withTimestamps();
     }
 
     public function departments(): BelongsToMany
@@ -39,8 +51,8 @@ class Project extends Model
             ->withTimestamps();
     }
 
-    public function tasks(): HasMany
+    public function comments(): HasMany
     {
-        return $this->hasMany(Task::class);
+        return $this->hasMany(TaskComment::class);
     }
 }

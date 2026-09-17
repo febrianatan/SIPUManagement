@@ -26,4 +26,10 @@ class Department extends Model
         return $this->belongsToMany(Project::class)
             ->withTimestamps();
     }
+
+    public function tasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class)
+            ->withTimestamps();
+    }
 }
