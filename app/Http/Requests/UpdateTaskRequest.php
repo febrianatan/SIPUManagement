@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +10,13 @@ class UpdateTaskRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $task = $this->route('task');
+
+        if (!$task instanceof Task) {
+            return false;
+        }
+
+        return $this->user()?->can('update', $task) ?? false;
     }
 
     public function rules(): array
@@ -56,21 +63,10 @@ class UpdateTaskRequest extends FormRequest
                 'date',
             ],
 
-            'department_ids' => [
+            'assignee_ids' => [
                 'required',
                 'array',
                 'min:1',
-            ],
-
-            'department_ids.*' => [
-                'integer',
-                'distinct',
-                'exists:departments,id',
-            ],
-
-            'assignee_ids' => [
-                'nullable',
-                'array',
             ],
 
             'assignee_ids.*' => [

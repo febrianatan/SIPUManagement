@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
@@ -23,25 +24,16 @@ class TaskController extends Controller
                 'project:id,name',
                 'creator:id,name,email',
                 'assignees:id,name,email,department_id',
-                'departments:id,name,code',
             ])
             ->orderByDesc('created_at');
 
         if ($user->role !== 'administrator') {
             $query->where(function ($query) use ($user) {
-                $query->where('created_by', $user->id)
+                $query
+                    ->where('created_by', $user->id)
                     ->orWhereHas('assignees', function ($query) use ($user) {
                         $query->where('users.id', $user->id);
                     });
-
-                if ($user->department_id !== null) {
-                    $query->orWhereHas('departments', function ($query) use ($user) {
-                        $query->where(
-                            'departments.id',
-                            $user->department_id
-                        );
-                    });
-                }
             });
         }
 
@@ -57,9 +49,21 @@ class TaskController extends Controller
         $task->load([
             'project:id,name',
             'creator:id,name,email',
-            'assignees:id,name,email,department_id',
-            'departments:id,name,code',
+
+            'assignees' => function ($query) {
+                $query
+                    ->select(
+                        'users.id',
+                        'users.name',
+                        'users.email',
+                        'users.department_id'
+                    )
+                    ->withPivot('acknowledged_at');
+            },
+
             'comments.user:id,name,email',
+
+            'activities.actor:id,name,email',
         ]);
 
         return Inertia::render('tasks/show', [
@@ -67,26 +71,33 @@ class TaskController extends Controller
         ]);
     }
 
-    public function store(StoreTaskRequest $request): RedirectResponse
-    {
+    public function store(
+        StoreTaskRequest $request
+    ): RedirectResponse {
         $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $request) {
             $task = Task::create([
-                'project_id'  => $validated['project_id'] ?? null,
-                'created_by'  => $request->user()->id,
-                'title'       => $validated['title'],
+                'project_id' => $validated['project_id'] ?? null,
+                'created_by' => $request->user()->id,
+                'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
-                'status'      => $validated['status'],
-                'priority'    => $validated['priority'],
-                'due_at'      => $validated['due_at'] ?? null,
+                'status' => $validated['status'],
+                'priority' => $validated['priority'],
+                'due_at' => $validated['due_at'] ?? null,
             ]);
 
-            $task->departments()
-                ->sync($validated['department_ids']);
+            $task->assignees()->sync(
+                $validated['assignee_ids']
+            );
 
-            $task->assignees()
-                ->sync($validated['assignee_ids'] ?? []);
+            $task->recordActivity(
+                'task_created',
+                $request->user(),
+                [
+                    'assignee_ids' => $validated['assignee_ids'],
+                ]
+            );
         });
 
         return back()->with(
@@ -99,25 +110,33 @@ class TaskController extends Controller
         UpdateTaskRequest $request,
         Task $task
     ): RedirectResponse {
+        /*
+         * Authorization sebenarnya sudah dilakukan
+         * oleh UpdateTaskRequest::authorize().
+         *
+         * Gate ini boleh tetap dipertahankan sebagai
+         * lapisan keamanan tambahan.
+         */
         Gate::authorize('update', $task);
 
         $validated = $request->validated();
 
-        DB::transaction(function () use ($validated, $task) {
+        DB::transaction(function () use (
+            $validated,
+            $task
+        ) {
             $task->update([
-                'project_id'  => $validated['project_id'] ?? null,
-                'title'       => $validated['title'],
+                'project_id' => $validated['project_id'] ?? null,
+                'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
-                'status'      => $validated['status'],
-                'priority'    => $validated['priority'],
-                'due_at'      => $validated['due_at'] ?? null,
+                'status' => $validated['status'],
+                'priority' => $validated['priority'],
+                'due_at' => $validated['due_at'] ?? null,
             ]);
 
-            $task->departments()
-                ->sync($validated['department_ids']);
-
-            $task->assignees()
-                ->sync($validated['assignee_ids'] ?? []);
+            $task->assignees()->sync(
+                $validated['assignee_ids']
+            );
         });
 
         return back()->with(
@@ -132,9 +151,32 @@ class TaskController extends Controller
     ): RedirectResponse {
         Gate::authorize('updateStatus', $task);
 
-        $task->update([
-            'status' => $request->validated('status'),
-        ]);
+        $oldStatus = $task->status;
+        $newStatus = $request->validated('status');
+
+        if ($oldStatus === $newStatus) {
+            return back();
+        }
+
+        DB::transaction(function () use (
+            $task,
+            $oldStatus,
+            $newStatus,
+            $request
+        ) {
+            $task->update([
+                'status' => $newStatus,
+            ]);
+
+            $task->recordActivity(
+                'status_changed',
+                $request->user(),
+                [
+                    'from' => $oldStatus,
+                    'to' => $newStatus,
+                ]
+            );
+        });
 
         return back()->with(
             'success',
@@ -142,8 +184,9 @@ class TaskController extends Controller
         );
     }
 
-    public function destroy(Task $task): RedirectResponse
-    {
+    public function destroy(
+        Task $task
+    ): RedirectResponse {
         Gate::authorize('delete', $task);
 
         $task->delete();

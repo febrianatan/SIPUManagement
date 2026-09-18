@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskCommentRequest;
@@ -16,10 +15,18 @@ class TaskCommentController extends Controller
     ): RedirectResponse {
         Gate::authorize('view', $task);
 
-        $task->comments()->create([
+        $comment = $task->comments()->create([
             'user_id' => $request->user()->id,
             'message' => $request->validated('message'),
         ]);
+
+        $task->recordActivity(
+            'comment_added',
+            $request->user(),
+            [
+                'comment_id' => $comment->id,
+            ]
+        );
 
         return back()->with(
             'success',

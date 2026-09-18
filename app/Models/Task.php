@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use App\Models\TaskActivity;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,5 +56,26 @@ class Task extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(TaskComment::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(TaskActivity::class)
+            ->latest();
+    }
+
+    public function recordActivity(
+        string $action,
+        ?User $actor = null,
+        array $metadata = []
+    ): TaskActivity {
+        return $this->activities()->create([
+            'actor_id'   => $actor?->id,
+            'actor_name' => $actor?->name,
+            'action'     => $action,
+            'metadata'   => empty($metadata)
+                ? null
+                : $metadata,
+        ]);
     }
 }

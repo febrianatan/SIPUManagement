@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Task;
@@ -26,6 +25,11 @@ class TaskAcknowledgementController extends Controller
                 [
                     'acknowledged_at' => now(),
                 ]
+            );
+
+            $task->recordActivity(
+                'task_acknowledged',
+                $user
             );
         }
 

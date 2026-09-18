@@ -26,20 +26,9 @@ class TaskPolicy
             return true;
         }
 
-        if ($task->assignees()->where('users.id', $user->id)->exists()) {
-            return true;
-        }
-
-        if (
-            $user->department_id !== null
-            && $task->departments()
-            ->where('departments.id', $user->department_id)
-            ->exists()
-        ) {
-            return true;
-        }
-
-        return false;
+        return $task->assignees()
+            ->where('users.id', $user->id)
+            ->exists();
     }
 
     public function create(User $user): bool

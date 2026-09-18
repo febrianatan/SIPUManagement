@@ -15,14 +15,8 @@ class TaskCommentTest extends TestCase
 
     public function test_task_creator_can_comment(): void
     {
-        $department = Department::create([
-            'name' => 'Front Office',
-            'code' => 'FO',
-        ]);
-
         $creator = User::factory()->create([
             'role' => 'staff',
-            'department_id' => $department->id,
         ]);
 
         $task = Task::create([
@@ -34,9 +28,12 @@ class TaskCommentTest extends TestCase
 
         $response = $this
             ->actingAs($creator)
-            ->post(route('tasks.comments.store', $task), [
-                'message' => 'PC dibutuhkan sebelum shift sore.',
-            ]);
+            ->post(
+                route('tasks.comments.store', $task),
+                [
+                    'message' => 'PC dibutuhkan sebelum shift sore.',
+                ]
+            );
 
         $response->assertSessionHasNoErrors();
 
@@ -68,9 +65,12 @@ class TaskCommentTest extends TestCase
 
         $response = $this
             ->actingAs($assignee)
-            ->post(route('tasks.comments.store', $task), [
-                'message' => 'Sedang saya cek.',
-            ]);
+            ->post(
+                route('tasks.comments.store', $task),
+                [
+                    'message' => 'Sedang saya cek.',
+                ]
+            );
 
         $response->assertSessionHasNoErrors();
 
@@ -81,26 +81,25 @@ class TaskCommentTest extends TestCase
         ]);
     }
 
-    public function test_staff_from_target_department_can_comment(): void
+    public function test_staff_from_same_department_but_not_assigned_cannot_comment(): void
     {
-        $frontOffice = Department::create([
-            'name' => 'Front Office',
-            'code' => 'FO',
-        ]);
-
         $it = Department::create([
             'name' => 'Information Technology',
             'code' => 'IT',
         ]);
 
         $creator = User::factory()->create([
-            'department_id' => $frontOffice->id,
             'role' => 'staff',
         ]);
 
-        $itStaff = User::factory()->create([
-            'department_id' => $it->id,
+        $assignee = User::factory()->create([
             'role' => 'staff',
+            'department_id' => $it->id,
+        ]);
+
+        $otherItStaff = User::factory()->create([
+            'role' => 'staff',
+            'department_id' => $it->id,
         ]);
 
         $task = Task::create([
@@ -110,19 +109,22 @@ class TaskCommentTest extends TestCase
             'priority' => 'medium',
         ]);
 
-        $task->departments()->attach($it->id);
+        $task->assignees()->attach($assignee->id);
 
         $response = $this
-            ->actingAs($itStaff)
-            ->post(route('tasks.comments.store', $task), [
-                'message' => 'Kami cek setelah briefing.',
-            ]);
+            ->actingAs($otherItStaff)
+            ->post(
+                route('tasks.comments.store', $task),
+                [
+                    'message' => 'Saya satu department tapi bukan assignee.',
+                ]
+            );
 
-        $response->assertSessionHasNoErrors();
+        $response->assertForbidden();
 
-        $this->assertDatabaseHas('task_comments', [
+        $this->assertDatabaseMissing('task_comments', [
             'task_id' => $task->id,
-            'user_id' => $itStaff->id,
+            'user_id' => $otherItStaff->id,
         ]);
     }
 
@@ -145,14 +147,18 @@ class TaskCommentTest extends TestCase
 
         $response = $this
             ->actingAs($unrelatedUser)
-            ->post(route('tasks.comments.store', $task), [
-                'message' => 'Tidak seharusnya masuk.',
-            ]);
+            ->post(
+                route('tasks.comments.store', $task),
+                [
+                    'message' => 'Tidak seharusnya masuk.',
+                ]
+            );
 
         $response->assertForbidden();
 
         $this->assertDatabaseMissing('task_comments', [
-            'message' => 'Tidak seharusnya masuk.',
+            'task_id' => $task->id,
+            'user_id' => $unrelatedUser->id,
         ]);
     }
 
@@ -179,8 +185,8 @@ class TaskCommentTest extends TestCase
             ->actingAs($user)
             ->delete(
                 route('tasks.comments.destroy', [
-                    $task,
-                    $comment,
+                    'task' => $task,
+                    'comment' => $comment,
                 ])
             );
 
