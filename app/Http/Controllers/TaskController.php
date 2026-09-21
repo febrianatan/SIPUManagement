@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\TaskIndexRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Requests\UpdateTaskStatusRequest;
 use App\Models\Task;
+use App\Services\TaskStatusService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -15,39 +16,247 @@ use Inertia\Response;
 
 class TaskController extends Controller
 {
-    public function index(Request $request): Response
-    {
-        $user = $request->user();
+    public function index(
+        TaskIndexRequest $request
+    ): Response {
+        $user      = $request->user();
+        $validated = $request->validated();
 
-        $query = Task::query()
+        /*
+     * Query dasar.
+     *
+     * Status sengaja belum dimasukkan,
+     * karena base query juga dipakai
+     * untuk menghitung jumlah tiap kolom Kanban.
+     */
+        $baseQuery = Task::query()
+            ->visibleTo($user)
+            ->search(
+                $validated['search'] ?? null
+            )
+            ->priority(
+                $validated['priority'] ?? null
+            )
+            ->project(
+                $validated['project_id'] ?? null
+            )
+            ->assignee(
+                $validated['assignee_id'] ?? null
+            )
+            ->acknowledgement(
+                $user,
+                $validated['acknowledgement'] ?? null
+            )
+            ->createdBy(
+                $validated['created_by'] ?? null
+            )
+            ->due(
+                $validated['due'] ?? null
+            );
+
+        /*
+     * Count untuk Kanban.
+     */
+        $statusCounts = [
+            'todo'        => (clone $baseQuery)
+                ->where('status', 'todo')
+                ->count(),
+
+            'in_progress' => (clone $baseQuery)
+                ->where('status', 'in_progress')
+                ->count(),
+
+            'review'      => (clone $baseQuery)
+                ->where('status', 'review')
+                ->count(),
+
+            'done'        => (clone $baseQuery)
+                ->where('status', 'done')
+                ->count(),
+        ];
+
+        /*
+     * Filter status baru diterapkan
+     * ke daftar task.
+     */
+        $query = (clone $baseQuery)
+            ->status(
+                $validated['status'] ?? null
+            );
+
+        $perPage =
+            $validated['per_page'] ?? 20;
+
+        $tasks = $query
             ->with([
                 'project:id,name',
                 'creator:id,name,email',
-                'assignees:id,name,email,department_id',
-            ])
-            ->orderByDesc('created_at');
 
-        if ($user->role !== 'administrator') {
-            $query->where(function ($query) use ($user) {
-                $query
-                    ->where('created_by', $user->id)
-                    ->orWhereHas('assignees', function ($query) use ($user) {
-                        $query->where('users.id', $user->id);
-                    });
-            });
-        }
+                'assignees' => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.name',
+                        'users.email',
+                        'users.department_id'
+                    );
+                },
+            ])
+            ->orderByRaw(
+                "
+            CASE priority
+                WHEN 'urgent' THEN 1
+                WHEN 'high' THEN 2
+                WHEN 'medium' THEN 3
+                WHEN 'low' THEN 4
+                ELSE 5
+            END
+            "
+            )
+            ->orderByRaw(
+                'CASE WHEN due_at IS NULL THEN 1 ELSE 0 END'
+            )
+            ->orderBy('due_at')
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render('tasks/index', [
-            'tasks' => $query->get(),
+            'tasks'         => $tasks,
+
+            /*
+         * Filter aktif.
+         *
+         * Ini dikirim kembali ke frontend
+         * supaya UI tahu filter apa yang
+         * sedang aktif.
+         */
+            'filters'       => [
+                'search'          =>
+                $validated['search'] ?? null,
+
+                'status'          =>
+                $validated['status'] ?? null,
+
+                'priority'        =>
+                $validated['priority'] ?? null,
+
+                'project_id'      =>
+                $validated['project_id'] ?? null,
+
+                'assignee_id'     =>
+                $validated['assignee_id'] ?? null,
+
+                /*
+             * INI YANG TADI KETINGGALAN.
+             */
+                'acknowledgement' =>
+                $validated['acknowledgement'] ?? null,
+
+                'created_by'      =>
+                $validated['created_by'] ?? null,
+
+                'due'             =>
+                $validated['due'] ?? null,
+
+                'per_page'        =>
+                $perPage,
+            ],
+
+            /*
+         * Count tiap status untuk Kanban.
+         */
+            'statusCounts'  =>
+            $statusCounts,
+
+            /*
+         * Option untuk filter frontend.
+         */
+            'filterOptions' => [
+                'statuses'         => [
+                    [
+                        'value' => 'todo',
+                        'label' => 'To Do',
+                    ],
+                    [
+                        'value' => 'in_progress',
+                        'label' => 'In Progress',
+                    ],
+                    [
+                        'value' => 'review',
+                        'label' => 'Review',
+                    ],
+                    [
+                        'value' => 'done',
+                        'label' => 'Done',
+                    ],
+                ],
+
+                'priorities'       => [
+                    [
+                        'value' => 'low',
+                        'label' => 'Low',
+                    ],
+                    [
+                        'value' => 'medium',
+                        'label' => 'Medium',
+                    ],
+                    [
+                        'value' => 'high',
+                        'label' => 'High',
+                    ],
+                    [
+                        'value' => 'urgent',
+                        'label' => 'Urgent',
+                    ],
+                ],
+
+                'acknowledgements' => [
+                    [
+                        'value' => 'pending',
+                        'label' => 'Need Acknowledgement',
+                    ],
+                    [
+                        'value' => 'acknowledged',
+                        'label' => 'Acknowledged',
+                    ],
+                ],
+
+                'due'              => [
+                    [
+                        'value' => 'overdue',
+                        'label' => 'Overdue',
+                    ],
+                    [
+                        'value' => 'today',
+                        'label' => 'Due Today',
+                    ],
+                    [
+                        'value' => 'upcoming',
+                        'label' => 'Upcoming',
+                    ],
+                    [
+                        'value' => 'no_due',
+                        'label' => 'No Due Date',
+                    ],
+                ],
+            ],
         ]);
     }
 
-    public function show(Task $task): Response
-    {
-        Gate::authorize('view', $task);
+    public function show(
+        Task $task,
+        TaskStatusService $taskStatusService
+    ): Response {
+        Gate::authorize(
+            'view',
+            $task
+        );
+
+        $user = request()->user();
 
         $task->load([
             'project:id,name',
+
             'creator:id,name,email',
 
             'assignees' => function ($query) {
@@ -58,7 +267,9 @@ class TaskController extends Controller
                         'users.email',
                         'users.department_id'
                     )
-                    ->withPivot('acknowledged_at');
+                    ->withPivot(
+                        'acknowledged_at'
+                    );
             },
 
             'comments.user:id,name,email',
@@ -66,9 +277,134 @@ class TaskController extends Controller
             'activities.actor:id,name,email',
         ]);
 
-        return Inertia::render('tasks/show', [
-            'task' => $task,
-        ]);
+        /*
+     * Cari assignment milik user login.
+     */
+        $currentAssignment =
+            $task->assignees->firstWhere(
+                'id',
+                $user->id
+            );
+
+        $isAssignee =
+            $currentAssignment !== null;
+
+        $hasAcknowledged =
+            $isAssignee
+            && $currentAssignment
+            ->pivot
+            ->acknowledged_at !== null;
+
+        /*
+     * Status berikutnya yang diizinkan.
+     */
+        $availableStatuses =
+            $taskStatusService
+            ->availableTransitions(
+                $task,
+                $user
+            );
+
+        /*
+     * Tambahkan label agar frontend tidak perlu
+     * menerjemahkan status sendiri.
+     */
+        $availableStatusOptions =
+            collect($availableStatuses)
+            ->map(function (
+                string $status
+            ) use ($taskStatusService) {
+                return [
+                    'value' => $status,
+
+                    'label' =>
+                    $taskStatusService
+                        ->statusLabel(
+                            $status
+                        ),
+                ];
+            })
+            ->values();
+
+        return Inertia::render(
+            'tasks/show',
+            [
+                'task'       => $task,
+
+                /*
+             * Permission umum.
+             */
+                'can'        => [
+                    'edit'          =>
+                    $user->can(
+                        'update',
+                        $task
+                    ),
+
+                    'delete'        =>
+                    $user->can(
+                        'delete',
+                        $task
+                    ),
+
+                    'update_status' =>
+                    $user->can(
+                        'updateStatus',
+                        $task
+                    ),
+
+                    /*
+                 * User bisa comment kalau bisa
+                 * melihat task.
+                 */
+                    'comment'       =>
+                    $user->can(
+                        'view',
+                        $task
+                    ),
+                ],
+
+                /*
+             * State khusus user login.
+             */
+                'assignment' => [
+                    'is_assignee'     =>
+                    $isAssignee,
+
+                    'acknowledged'    =>
+                    $hasAcknowledged,
+
+                    'acknowledged_at' =>
+                    $currentAssignment
+                        ?->pivot
+                        ?->acknowledged_at,
+
+                    /*
+                 * Tombol acknowledge hanya muncul
+                 * kalau memang assignee dan belum
+                 * acknowledge.
+                 */
+                    'can_acknowledge' =>
+                    $isAssignee
+                        && ! $hasAcknowledged,
+                ],
+
+                /*
+             * State workflow.
+             */
+                'workflow'   => [
+                    'requires_review'    =>
+                    (bool)
+                    $task->requires_review,
+
+                    'current_status'     =>
+                    $task->status,
+
+                    'available_statuses' =>
+                    $availableStatusOptions,
+                ],
+            ]
+        );
     }
 
     public function store(
@@ -76,15 +412,34 @@ class TaskController extends Controller
     ): RedirectResponse {
         $validated = $request->validated();
 
-        DB::transaction(function () use ($validated, $request) {
+        DB::transaction(function () use (
+            $validated,
+            $request
+        ) {
             $task = Task::create([
-                'project_id' => $validated['project_id'] ?? null,
-                'created_by' => $request->user()->id,
-                'title' => $validated['title'],
-                'description' => $validated['description'] ?? null,
-                'status' => $validated['status'],
-                'priority' => $validated['priority'],
-                'due_at' => $validated['due_at'] ?? null,
+                'project_id'      =>
+                $validated['project_id'] ?? null,
+
+                'created_by'      =>
+                $request->user()->id,
+
+                'title'           =>
+                $validated['title'],
+
+                'description'     =>
+                $validated['description'] ?? null,
+
+                'status'          =>
+                $validated['status'],
+
+                'priority'        =>
+                $validated['priority'],
+
+                'due_at'          =>
+                $validated['due_at'] ?? null,
+
+                'requires_review' =>
+                $validated['requires_review'] ?? false,
             ]);
 
             $task->assignees()->sync(
@@ -95,7 +450,8 @@ class TaskController extends Controller
                 'task_created',
                 $request->user(),
                 [
-                    'assignee_ids' => $validated['assignee_ids'],
+                    'assignee_ids' =>
+                    $validated['assignee_ids'],
                 ]
             );
         });
@@ -110,33 +466,155 @@ class TaskController extends Controller
         UpdateTaskRequest $request,
         Task $task
     ): RedirectResponse {
-        /*
-         * Authorization sebenarnya sudah dilakukan
-         * oleh UpdateTaskRequest::authorize().
-         *
-         * Gate ini boleh tetap dipertahankan sebagai
-         * lapisan keamanan tambahan.
-         */
         Gate::authorize('update', $task);
 
         $validated = $request->validated();
 
         DB::transaction(function () use (
             $validated,
-            $task
+            $task,
+            $request
         ) {
+            $before = [
+                'project_id'      =>
+                $task->project_id,
+
+                'title'           =>
+                $task->title,
+
+                'description'     =>
+                $task->description,
+
+                'priority'        =>
+                $task->priority,
+
+                'due_at'          =>
+                $task->due_at?->toDateTimeString(),
+
+                'requires_review' =>
+                (bool) $task->requires_review,
+            ];
+
+            $oldAssignees = $task
+                ->assignees()
+                ->get([
+                    'users.id',
+                    'users.name',
+                ])
+                ->keyBy('id');
+
             $task->update([
-                'project_id' => $validated['project_id'] ?? null,
-                'title' => $validated['title'],
-                'description' => $validated['description'] ?? null,
-                'status' => $validated['status'],
-                'priority' => $validated['priority'],
-                'due_at' => $validated['due_at'] ?? null,
+                'project_id'      =>
+                $validated['project_id'] ?? null,
+
+                'title'           =>
+                $validated['title'],
+
+                'description'     =>
+                $validated['description'] ?? null,
+
+                'priority'        =>
+                $validated['priority'],
+
+                'due_at'          =>
+                $validated['due_at'] ?? null,
+
+                'requires_review' =>
+                $validated['requires_review'] ?? $task->requires_review,
             ]);
 
             $task->assignees()->sync(
                 $validated['assignee_ids']
             );
+
+            $task->refresh();
+
+            $after = [
+                'project_id'      =>
+                $task->project_id,
+
+                'title'           =>
+                $task->title,
+
+                'description'     =>
+                $task->description,
+
+                'priority'        =>
+                $task->priority,
+
+                'due_at'          =>
+                $task->due_at?->toDateTimeString(),
+
+                'requires_review' =>
+                (bool) $task->requires_review,
+            ];
+
+            $changes = [];
+
+            foreach ($before as $field => $oldValue) {
+                $newValue = $after[$field];
+
+                if ($oldValue !== $newValue) {
+                    $changes[$field] = [
+                        'from' => $oldValue,
+                        'to'   => $newValue,
+                    ];
+                }
+            }
+
+            if (! empty($changes)) {
+                $task->recordActivity(
+                    'task_updated',
+                    $request->user(),
+                    [
+                        'changes' => $changes,
+                    ]
+                );
+            }
+
+            $newAssignees = $task
+                ->assignees()
+                ->get([
+                    'users.id',
+                    'users.name',
+                ])
+                ->keyBy('id');
+
+            $addedAssignees = $newAssignees
+                ->diffKeys($oldAssignees)
+                ->values()
+                ->map(function ($user) {
+                    return [
+                        'id'   => $user->id,
+                        'name' => $user->name,
+                    ];
+                })
+                ->all();
+
+            $removedAssignees = $oldAssignees
+                ->diffKeys($newAssignees)
+                ->values()
+                ->map(function ($user) {
+                    return [
+                        'id'   => $user->id,
+                        'name' => $user->name,
+                    ];
+                })
+                ->all();
+
+            if (
+                ! empty($addedAssignees)
+                || ! empty($removedAssignees)
+            ) {
+                $task->recordActivity(
+                    'assignees_changed',
+                    $request->user(),
+                    [
+                        'added'   => $addedAssignees,
+                        'removed' => $removedAssignees,
+                    ]
+                );
+            }
         });
 
         return back()->with(
@@ -147,36 +625,23 @@ class TaskController extends Controller
 
     public function updateStatus(
         UpdateTaskStatusRequest $request,
-        Task $task
+        Task $task,
+        TaskStatusService $taskStatusService
     ): RedirectResponse {
-        Gate::authorize('updateStatus', $task);
+        Gate::authorize(
+            'updateStatus',
+            $task
+        );
 
-        $oldStatus = $task->status;
-        $newStatus = $request->validated('status');
+        $changed = $taskStatusService->update(
+            $task,
+            $request->user(),
+            $request->validated('status')
+        );
 
-        if ($oldStatus === $newStatus) {
+        if (! $changed) {
             return back();
         }
-
-        DB::transaction(function () use (
-            $task,
-            $oldStatus,
-            $newStatus,
-            $request
-        ) {
-            $task->update([
-                'status' => $newStatus,
-            ]);
-
-            $task->recordActivity(
-                'status_changed',
-                $request->user(),
-                [
-                    'from' => $oldStatus,
-                    'to' => $newStatus,
-                ]
-            );
-        });
 
         return back()->with(
             'success',

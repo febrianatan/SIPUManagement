@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Requests;
 
 use App\Models\Task;
@@ -16,23 +15,23 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project_id' => [
+            'project_id'      => [
                 'nullable',
                 'exists:projects,id',
             ],
 
-            'title' => [
+            'title'           => [
                 'required',
                 'string',
                 'max:255',
             ],
 
-            'description' => [
+            'description'     => [
                 'nullable',
                 'string',
             ],
 
-            'status' => [
+            'status'          => [
                 'required',
                 Rule::in([
                     'todo',
@@ -42,7 +41,7 @@ class StoreTaskRequest extends FormRequest
                 ]),
             ],
 
-            'priority' => [
+            'priority'        => [
                 'required',
                 Rule::in([
                     'low',
@@ -52,21 +51,26 @@ class StoreTaskRequest extends FormRequest
                 ]),
             ],
 
-            'due_at' => [
+            'due_at'          => [
                 'nullable',
                 'date',
             ],
 
-            'assignee_ids' => [
+            'assignee_ids'    => [
                 'required',
                 'array',
                 'min:1',
             ],
 
-            'assignee_ids.*' => [
+            'assignee_ids.*'  => [
                 'integer',
                 'distinct',
                 'exists:users,id',
+            ],
+
+            'requires_review' => [
+                'sometimes',
+                'boolean',
             ],
         ];
     }

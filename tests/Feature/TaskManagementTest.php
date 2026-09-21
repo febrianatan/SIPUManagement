@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Feature;
 
 use App\Models\Department;
@@ -26,23 +25,23 @@ class TaskManagementTest extends TestCase
         ]);
 
         $creator = User::factory()->create([
-            'role' => 'staff',
+            'role'          => 'staff',
             'department_id' => $frontOffice->id,
         ]);
 
         $assignee = User::factory()->create([
-            'role' => 'staff',
+            'role'          => 'staff',
             'department_id' => $it->id,
         ]);
 
         $response = $this
             ->actingAs($creator)
             ->post(route('tasks.store'), [
-                'project_id' => null,
-                'title' => 'Perbaiki PC Front Office',
-                'description' => 'PC tidak dapat boot.',
-                'status' => 'todo',
-                'priority' => 'urgent',
+                'project_id'   => null,
+                'title'        => 'Perbaiki PC Front Office',
+                'description'  => 'PC tidak dapat boot.',
+                'status'       => 'todo',
+                'priority'     => 'urgent',
                 'assignee_ids' => [
                     $assignee->id,
                 ],
@@ -58,11 +57,11 @@ class TaskManagementTest extends TestCase
         $this->assertNull($task->project_id);
 
         $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
+            'id'         => $task->id,
             'created_by' => $creator->id,
-            'title' => 'Perbaiki PC Front Office',
-            'status' => 'todo',
-            'priority' => 'urgent',
+            'title'      => 'Perbaiki PC Front Office',
+            'status'     => 'todo',
+            'priority'   => 'urgent',
         ]);
 
         $this->assertDatabaseHas('task_user', [
@@ -84,20 +83,20 @@ class TaskManagementTest extends TestCase
         ]);
 
         $creator = User::factory()->create([
-            'role' => 'staff',
+            'role'          => 'staff',
             'department_id' => $frontOffice->id,
         ]);
 
         $assignee = User::factory()->create([
-            'role' => 'staff',
+            'role'          => 'staff',
             'department_id' => $engineering->id,
         ]);
 
         $project = Project::create([
-            'name' => 'Wedding Event',
+            'name'        => 'Wedding Event',
             'description' => 'Wedding preparation project.',
-            'status' => 'active',
-            'created_by' => $creator->id,
+            'status'      => 'active',
+            'created_by'  => $creator->id,
         ]);
 
         $project->departments()->attach([
@@ -108,11 +107,11 @@ class TaskManagementTest extends TestCase
         $response = $this
             ->actingAs($creator)
             ->post(route('tasks.store'), [
-                'project_id' => $project->id,
-                'title' => 'Setup Lighting',
-                'description' => 'Setup lighting ballroom.',
-                'status' => 'todo',
-                'priority' => 'high',
+                'project_id'   => $project->id,
+                'title'        => 'Setup Lighting',
+                'description'  => 'Setup lighting ballroom.',
+                'status'       => 'todo',
+                'priority'     => 'high',
                 'assignee_ids' => [
                     $assignee->id,
                 ],
@@ -131,12 +130,12 @@ class TaskManagementTest extends TestCase
         );
 
         $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
+            'id'         => $task->id,
             'project_id' => $project->id,
             'created_by' => $creator->id,
-            'title' => 'Setup Lighting',
-            'status' => 'todo',
-            'priority' => 'high',
+            'title'      => 'Setup Lighting',
+            'status'     => 'todo',
+            'priority'   => 'high',
         ]);
 
         $this->assertDatabaseHas('task_user', [
@@ -157,12 +156,17 @@ class TaskManagementTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title' => 'Perbaiki PC FO',
-            'status' => 'todo',
-            'priority' => 'high',
+            'title'      => 'Perbaiki PC FO',
+            'status'     => 'todo',
+            'priority'   => 'high',
         ]);
 
-        $task->assignees()->attach($assignee->id);
+        $task->assignees()->attach(
+            $assignee->id,
+            [
+                'acknowledged_at' => now(),
+            ]
+        );
 
         $response = $this
             ->actingAs($assignee)
@@ -176,7 +180,7 @@ class TaskManagementTest extends TestCase
         $response->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
+            'id'     => $task->id,
             'status' => 'in_progress',
         ]);
     }
@@ -192,34 +196,38 @@ class TaskManagementTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' => $creator->id,
-            'title' => 'Original Task',
+            'created_by'  => $creator->id,
+            'title'       => 'Original Task',
             'description' => 'Original description',
-            'status' => 'todo',
-            'priority' => 'high',
+            'status'      => 'todo',
+            'priority'    => 'high',
         ]);
 
-        $task->assignees()->attach($assignee->id);
+        $task->assignees()->attach(
+            $assignee->id
+        );
 
         $response = $this
             ->actingAs($assignee)
-            ->patch(route('tasks.update', $task), [
-                'project_id' => null,
-                'title' => 'Changed Task',
-                'description' => 'Changed description',
-                'status' => 'todo',
-                'priority' => 'low',
-                'due_at' => null,
-                'assignee_ids' => [
-                    $assignee->id,
-                ],
-            ]);
+            ->patch(
+                route('tasks.update', $task),
+                [
+                    'project_id'   => null,
+                    'title'        => 'Changed Task',
+                    'description'  => 'Changed description',
+                    'priority'     => 'low',
+                    'due_at'       => null,
+                    'assignee_ids' => [
+                        $assignee->id,
+                    ],
+                ]
+            );
 
         $response->assertForbidden();
 
         $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
-            'title' => 'Original Task',
+            'id'       => $task->id,
+            'title'    => 'Original Task',
             'priority' => 'high',
         ]);
     }
@@ -236,9 +244,9 @@ class TaskManagementTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title' => 'Private Task',
-            'status' => 'todo',
-            'priority' => 'medium',
+            'title'      => 'Private Task',
+            'status'     => 'todo',
+            'priority'   => 'medium',
         ]);
 
         $response = $this
@@ -253,7 +261,7 @@ class TaskManagementTest extends TestCase
         $response->assertForbidden();
 
         $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
+            'id'     => $task->id,
             'status' => 'todo',
         ]);
     }
@@ -266,9 +274,9 @@ class TaskManagementTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title' => 'My Task',
-            'status' => 'todo',
-            'priority' => 'medium',
+            'title'      => 'My Task',
+            'status'     => 'todo',
+            'priority'   => 'medium',
         ]);
 
         $response = $this
@@ -283,7 +291,7 @@ class TaskManagementTest extends TestCase
         $response->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
+            'id'     => $task->id,
             'status' => 'in_progress',
         ]);
     }
