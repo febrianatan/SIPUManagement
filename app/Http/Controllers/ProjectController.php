@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
+use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,23 +20,57 @@ class ProjectController extends Controller
 
         $query = Project::query()
             ->with([
-                'creator:id,name,email',
+                'creator:id,name,email,department_id',
                 'departments:id,name,code',
             ])
+            ->withCount('tasks')
             ->orderByDesc('created_at');
 
+        /*
+         * Administrator melihat semua project.
+         *
+         * Staff melihat:
+         * - project yang dia buat
+         * - project yang melibatkan department-nya
+         */
         if ($user->role !== 'administrator') {
             $query->where(function ($query) use ($user) {
-                $query->where('created_by', $user->id);
+                /*
+         * Project yang dibuat sendiri.
+         */
+                $query->where(
+                    'created_by',
+                    $user->id
+                );
 
+                /*
+         * Project department sendiri.
+         */
                 if ($user->department_id !== null) {
-                    $query->orWhereHas('departments', function ($query) use ($user) {
-                        $query->where(
-                            'departments.id',
-                            $user->department_id
-                        );
-                    });
+                    $query->orWhereHas(
+                        'departments',
+                        function ($query) use ($user) {
+                            $query->where(
+                                'departments.id',
+                                $user->department_id
+                            );
+                        }
+                    );
                 }
+
+                /*
+         * Atau user menjadi assignee
+         * salah satu Task dalam Project.
+         */
+                $query->orWhereHas(
+                    'tasks.assignees',
+                    function ($query) use ($user) {
+                        $query->where(
+                            'users.id',
+                            $user->id
+                        );
+                    }
+                );
             });
         }
 
@@ -51,42 +86,265 @@ class ProjectController extends Controller
     ): Response {
         Gate::authorize('view', $project);
 
+        $user = $request->user();
+
+        /*
+         * Data utama project.
+         */
         $project->load([
-            'creator:id,name,email',
+            'creator:id,name,email,department_id',
             'departments:id,name,code',
         ]);
 
-        return Inertia::render('projects/show', [
-            'project' => $project,
-        ]);
+        /*
+         * Semua task dalam project boleh terlihat
+         * sebagai overview bagi user yang memang
+         * memiliki akses ke project.
+         *
+         * Tetapi akses Task Detail tetap mengikuti
+         * TaskPolicy melalui properti can_open.
+         */
+        $tasks = $project
+            ->tasks()
+            ->with([
+                'creator:id,name,email',
+
+                'assignees' => function ($query) {
+                    $query
+                        ->select(
+                            'users.id',
+                            'users.name',
+                            'users.email',
+                            'users.department_id'
+                        )
+                        ->withPivot(
+                            'acknowledged_at'
+                        );
+                },
+            ])
+            ->orderByRaw(
+                "
+                CASE priority
+                    WHEN 'urgent' THEN 1
+                    WHEN 'high' THEN 2
+                    WHEN 'medium' THEN 3
+                    WHEN 'low' THEN 4
+                    ELSE 5
+                END
+                "
+            )
+            ->orderByRaw(
+                'CASE WHEN due_at IS NULL THEN 1 ELSE 0 END'
+            )
+            ->orderBy('due_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+        /*
+         * Statistik project.
+         */
+        $totalTasks = $tasks->count();
+
+        $todoTasks = $tasks
+            ->where('status', 'todo')
+            ->count();
+
+        $inProgressTasks = $tasks
+            ->where('status', 'in_progress')
+            ->count();
+
+        $reviewTasks = $tasks
+            ->where('status', 'review')
+            ->count();
+
+        $doneTasks = $tasks
+            ->where('status', 'done')
+            ->count();
+
+        /*
+         * Kalau belum ada task:
+         * progress = 0%
+         */
+        $completionPercentage = $totalTasks > 0
+            ? (int) round(
+            ($doneTasks / $totalTasks) * 100
+        )
+            : 0;
+
+        /*
+         * Bentuk data task khusus Project Detail.
+         *
+         * Kita tidak mengirim comments/activity di sini
+         * karena itu milik halaman Task Detail.
+         */
+        $taskSummaries = $tasks
+            ->map(function (Task $task) use ($user) {
+                $assigneeCount =
+                $task->assignees->count();
+
+                $acknowledgedCount =
+                $task->assignees
+                    ->filter(function ($assignee) {
+                        return $assignee
+                            ->pivot
+                            ->acknowledged_at !== null;
+                    })
+                    ->count();
+
+                return [
+                    'id'                 => $task->id,
+
+                    'title'              => $task->title,
+
+                    'description'        =>
+                    $task->description,
+
+                    'status'             =>
+                    $task->status,
+
+                    'priority'           =>
+                    $task->priority,
+
+                    'due_at'             =>
+                    $task->due_at,
+
+                    'created_at'         =>
+                    $task->created_at,
+
+                    'creator'            =>
+                    $task->creator,
+
+                    'assignees'          =>
+                    $task->assignees,
+
+                    'assignee_count'     =>
+                    $assigneeCount,
+
+                    'acknowledged_count' =>
+                    $acknowledgedCount,
+
+                    /*
+                     * Apakah user boleh membuka
+                     * Task Detail.
+                     */
+                    'can_open'           =>
+                    $user->can(
+                        'view',
+                        $task
+                    ),
+
+                    /*
+                     * Berguna untuk drag/drop Kanban.
+                     */
+                    'can_update_status'  =>
+                    $user->can(
+                        'updateStatus',
+                        $task
+                    ),
+                ];
+            })
+            ->values();
+
+        return Inertia::render(
+            'projects/show',
+            [
+                'project' => $project,
+
+                'stats'   => [
+                    'total_tasks'           =>
+                    $totalTasks,
+
+                    'todo'                  =>
+                    $todoTasks,
+
+                    'in_progress'           =>
+                    $inProgressTasks,
+
+                    'review'                =>
+                    $reviewTasks,
+
+                    'done'                  =>
+                    $doneTasks,
+
+                    'completion_percentage' =>
+                    $completionPercentage,
+                ],
+
+                'tasks'   =>
+                $taskSummaries,
+
+                /*
+                 * Permission Project untuk frontend.
+                 */
+                'can'     => [
+                    'update' =>
+                    $user->can(
+                        'update',
+                        $project
+                    ),
+
+                    'delete' =>
+                    $user->can(
+                        'delete',
+                        $project
+                    ),
+                ],
+            ]
+        );
     }
 
     public function store(
         StoreProjectRequest $request
     ): RedirectResponse {
         $validated = $request->validated();
+        $user      = $request->user();
 
-        DB::transaction(function () use ($validated, $request) {
-            $user = $request->user();
-
+        DB::transaction(function () use (
+            $validated,
+            $user
+        ) {
             $project = Project::create([
-                'name'        => $validated['name'],
-                'description' => $validated['description'] ?? null,
-                'status'      => $validated['status'],
-                'created_by'  => $user->id,
-                'start_date'  => $validated['start_date'] ?? null,
-                'due_date'    => $validated['due_date'] ?? null,
+                'name'        =>
+                $validated['name'],
+
+                'description' =>
+                $validated['description'] ?? null,
+
+                'status'      =>
+                $validated['status'],
+
+                'created_by'  =>
+                $user->id,
+
+                'start_date'  =>
+                $validated['start_date'] ?? null,
+
+                'due_date'    =>
+                $validated['due_date'] ?? null,
             ]);
 
-            $departmentIds = $validated['department_ids'];
+            /*
+             * Department yang dipilih user.
+             */
+            $departmentIds =
+                $validated['department_ids'];
 
+            /*
+             * Department creator otomatis
+             * menjadi bagian project.
+             */
             if ($user->department_id !== null) {
-                $departmentIds[] = $user->department_id;
+                $departmentIds[] =
+                $user->department_id;
             }
 
-            $project->departments()->sync(
-                array_unique($departmentIds)
-            );
+            $project
+                ->departments()
+                ->sync(
+                    array_unique(
+                        $departmentIds
+                    )
+                );
         });
 
         return back()->with(
@@ -99,32 +357,67 @@ class ProjectController extends Controller
         UpdateProjectRequest $request,
         Project $project
     ): RedirectResponse {
-        Gate::authorize('update', $project);
+        Gate::authorize(
+            'update',
+            $project
+        );
 
-        $validated = $request->validated();
+        $validated =
+        $request->validated();
 
         DB::transaction(function () use (
             $validated,
-            $project,
-            $request
+            $project
         ) {
             $project->update([
-                'name'        => $validated['name'],
-                'description' => $validated['description'] ?? null,
-                'status'      => $validated['status'],
-                'start_date'  => $validated['start_date'] ?? null,
-                'due_date'    => $validated['due_date'] ?? null,
+                'name'        =>
+                $validated['name'],
+
+                'description' =>
+                $validated['description'] ?? null,
+
+                'status'      =>
+                $validated['status'],
+
+                'start_date'  =>
+                $validated['start_date'] ?? null,
+
+                'due_date'    =>
+                $validated['due_date'] ?? null,
             ]);
 
-            $departmentIds = $validated['department_ids'];
+            $departmentIds =
+                $validated['department_ids'];
 
-            if ($request->user()->department_id !== null) {
-                $departmentIds[] = $request->user()->department_id;
+            /*
+             * Penting:
+             *
+             * Yang dipertahankan adalah department
+             * milik CREATOR PROJECT,
+             * bukan department user yang sedang
+             * melakukan update.
+             *
+             * Ini penting ketika Admin mengedit project.
+             */
+            $creatorDepartmentId =
+            $project
+                ->creator()
+                ->value(
+                    'department_id'
+                );
+
+            if ($creatorDepartmentId !== null) {
+                $departmentIds[] =
+                    $creatorDepartmentId;
             }
 
-            $project->departments()->sync(
-                array_unique($departmentIds)
-            );
+            $project
+                ->departments()
+                ->sync(
+                    array_unique(
+                        $departmentIds
+                    )
+                );
         });
 
         return back()->with(
@@ -136,7 +429,10 @@ class ProjectController extends Controller
     public function destroy(
         Project $project
     ): RedirectResponse {
-        Gate::authorize('delete', $project);
+        Gate::authorize(
+            'delete',
+            $project
+        );
 
         $project->delete();
 

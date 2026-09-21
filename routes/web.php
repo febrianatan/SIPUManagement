@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskAcknowledgementController;
 use App\Http\Controllers\TaskCommentController;
@@ -14,9 +15,12 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get(
+        '/dashboard',
+        [DashboardController::class, 'index']
+    )
+        ->middleware(['auth', 'verified'])
+        ->name('dashboard');
 
     // PROJECT MANAGEMENT
     Route::get('/projects', [ProjectController::class, 'index'])

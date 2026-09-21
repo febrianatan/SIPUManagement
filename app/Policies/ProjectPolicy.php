@@ -7,8 +7,10 @@ use App\Models\User;
 
 class ProjectPolicy
 {
-    public function before(User $user, string $ability): bool|null
-    {
+    public function before(
+        User $user,
+        string $ability
+    ): bool|null {
         if ($user->role === 'administrator') {
             return true;
         }
@@ -21,18 +23,49 @@ class ProjectPolicy
         return true;
     }
 
-    public function view(User $user, Project $project): bool
-    {
+    public function view(
+        User $user,
+        Project $project
+    ): bool {
+        /*
+         * Creator project.
+         */
         if ($project->created_by === $user->id) {
             return true;
         }
 
-        if ($user->department_id === null) {
-            return false;
+        /*
+         * Department user menjadi participant
+         * dalam project.
+         */
+        if (
+            $user->department_id !== null
+            && $project
+                ->departments()
+                ->where(
+                    'departments.id',
+                    $user->department_id
+                )
+                ->exists()
+        ) {
+            return true;
         }
 
-        return $project->departments()
-            ->where('departments.id', $user->department_id)
+        /*
+         * User di-assign ke minimal satu Task
+         * di dalam project.
+         */
+        return $project
+            ->tasks()
+            ->whereHas(
+                'assignees',
+                function ($query) use ($user) {
+                    $query->where(
+                        'users.id',
+                        $user->id
+                    );
+                }
+            )
             ->exists();
     }
 
@@ -41,13 +74,17 @@ class ProjectPolicy
         return true;
     }
 
-    public function update(User $user, Project $project): bool
-    {
+    public function update(
+        User $user,
+        Project $project
+    ): bool {
         return $project->created_by === $user->id;
     }
 
-    public function delete(User $user, Project $project): bool
-    {
+    public function delete(
+        User $user,
+        Project $project
+    ): bool {
         return $project->created_by === $user->id;
     }
 }
