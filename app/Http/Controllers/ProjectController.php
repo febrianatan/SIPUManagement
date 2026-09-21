@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProjectRequest;
@@ -19,60 +20,13 @@ class ProjectController extends Controller
         $user = $request->user();
 
         $query = Project::query()
+            ->visibleTo($user)
             ->with([
                 'creator:id,name,email,department_id',
                 'departments:id,name,code',
             ])
             ->withCount('tasks')
             ->orderByDesc('created_at');
-
-        /*
-         * Administrator melihat semua project.
-         *
-         * Staff melihat:
-         * - project yang dia buat
-         * - project yang melibatkan department-nya
-         */
-        if ($user->role !== 'administrator') {
-            $query->where(function ($query) use ($user) {
-                /*
-         * Project yang dibuat sendiri.
-         */
-                $query->where(
-                    'created_by',
-                    $user->id
-                );
-
-                /*
-         * Project department sendiri.
-         */
-                if ($user->department_id !== null) {
-                    $query->orWhereHas(
-                        'departments',
-                        function ($query) use ($user) {
-                            $query->where(
-                                'departments.id',
-                                $user->department_id
-                            );
-                        }
-                    );
-                }
-
-                /*
-         * Atau user menjadi assignee
-         * salah satu Task dalam Project.
-         */
-                $query->orWhereHas(
-                    'tasks.assignees',
-                    function ($query) use ($user) {
-                        $query->where(
-                            'users.id',
-                            $user->id
-                        );
-                    }
-                );
-            });
-        }
 
         return Inertia::render('projects/index', [
             'projects' => $query->get(),
@@ -166,8 +120,8 @@ class ProjectController extends Controller
          */
         $completionPercentage = $totalTasks > 0
             ? (int) round(
-            ($doneTasks / $totalTasks) * 100
-        )
+                ($doneTasks / $totalTasks) * 100
+            )
             : 0;
 
         /*
@@ -179,10 +133,10 @@ class ProjectController extends Controller
         $taskSummaries = $tasks
             ->map(function (Task $task) use ($user) {
                 $assigneeCount =
-                $task->assignees->count();
+                    $task->assignees->count();
 
                 $acknowledgedCount =
-                $task->assignees
+                    $task->assignees
                     ->filter(function ($assignee) {
                         return $assignee
                             ->pivot
@@ -334,7 +288,7 @@ class ProjectController extends Controller
              */
             if ($user->department_id !== null) {
                 $departmentIds[] =
-                $user->department_id;
+                    $user->department_id;
             }
 
             $project
@@ -362,7 +316,7 @@ class ProjectController extends Controller
         );
 
         $validated =
-        $request->validated();
+            $request->validated();
 
         DB::transaction(function () use (
             $validated,
@@ -399,7 +353,7 @@ class ProjectController extends Controller
              * Ini penting ketika Admin mengedit project.
              */
             $creatorDepartmentId =
-            $project
+                $project
                 ->creator()
                 ->value(
                     'department_id'

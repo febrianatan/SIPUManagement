@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskAcknowledgementController;
+use App\Http\Controllers\TaskAttachmentController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,16 @@ Route::middleware(['auth'])->group(function () {
         ->name('projects.destroy');
 
     // TASK MANAGEMENT
+    Route::get(
+        '/tasks/create',
+        [TaskController::class, 'create']
+    )->name('tasks.create');
+
+    Route::get(
+        '/tasks/{task}/edit',
+        [TaskController::class, 'edit']
+    )->name('tasks.edit');
+
     Route::get('/tasks', [TaskController::class, 'index'])
         ->name('tasks.index');
 
@@ -53,6 +64,36 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])
         ->name('tasks.destroy');
+
+    Route::post(
+        '/tasks/{task}/attachments',
+        [
+            TaskAttachmentController::class,
+            'store',
+        ]
+    )->name(
+        'tasks.attachments.store'
+    );
+
+    Route::get(
+        '/tasks/{task}/attachments/{attachment}/download',
+        [
+            TaskAttachmentController::class,
+            'download',
+        ]
+    )->name(
+        'tasks.attachments.download'
+    );
+
+    Route::delete(
+        '/tasks/{task}/attachments/{attachment}',
+        [
+            TaskAttachmentController::class,
+            'destroy',
+        ]
+    )->name(
+        'tasks.attachments.destroy'
+    );
 
     // TASK COMMENT MANAGEMENT
     Route::post(
