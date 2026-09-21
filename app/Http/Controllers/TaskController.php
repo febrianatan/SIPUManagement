@@ -39,6 +39,8 @@ class TaskController extends Controller
 
         return Inertia::render('tasks/index', [
             'tasks' => $query->get(),
+            'projects' => \App\Models\Project::select('id', 'name')->orderBy('name')->get(),
+            'users' => \App\Models\User::select('id', 'name', 'email')->orderBy('name')->get(),
         ]);
     }
 

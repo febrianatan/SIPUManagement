@@ -41,6 +41,7 @@ class ProjectController extends Controller
 
         return Inertia::render('projects/index', [
             'projects' => $query->get(),
+            'departments' => \App\Models\Department::all(),
         ]);
     }
 
