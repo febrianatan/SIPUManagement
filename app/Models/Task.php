@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -302,6 +303,13 @@ class Task extends Model
                     );
                 }
             }
+        );
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(
+            TaskAttachment::class
         );
     }
 }
