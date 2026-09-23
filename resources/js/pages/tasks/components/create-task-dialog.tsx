@@ -16,12 +16,12 @@ interface Props {
 }
 
 export function CreateTaskDialog({ open, onOpenChange, projects, users }: Props) {
-    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
-        title: '',
+    const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm({
+        name: '',
         description: '',
         status: 'todo',
         priority: 'medium',
-        due_at: '',
+        due_date: '',
         project_id: '' as string | number,
         assignee_ids: [] as number[],
     });
@@ -29,14 +29,12 @@ export function CreateTaskDialog({ open, onOpenChange, projects, users }: Props)
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         
-        // Clean up project_id before submission
-        const submitData = {
+        transform((data) => ({
             ...data,
             project_id: data.project_id === 'none' || data.project_id === '' ? null : data.project_id,
-        };
+        }));
 
         post(route('tasks.store'), {
-            data: submitData,
             onSuccess: () => {
                 reset();
                 onOpenChange(false);
@@ -75,8 +73,8 @@ export function CreateTaskDialog({ open, onOpenChange, projects, users }: Props)
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
                             <Label htmlFor="title">Task Title</Label>
-                            <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} placeholder="E.g., Design new homepage" autoFocus />
-                            {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+                            <Input id="title" value={data.name} onChange={(e) => setData('name', e.target.value)} placeholder="E.g., Design new homepage" autoFocus />
+                            {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                         </div>
 
                         <div className="grid gap-2">
@@ -144,9 +142,9 @@ export function CreateTaskDialog({ open, onOpenChange, projects, users }: Props)
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="due_at">Due Date (Optional)</Label>
-                            <Input id="due_at" type="datetime-local" value={data.due_at} onChange={(e) => setData('due_at', e.target.value)} />
-                            {errors.due_at && <p className="text-sm text-destructive">{errors.due_at}</p>}
+                            <Label htmlFor="due_date">Due Date (Optional)</Label>
+                            <Input id="due_date" type="datetime-local" value={data.due_date} onChange={(e) => setData('due_date', e.target.value)} />
+                            {errors.due_date && <p className="text-sm text-destructive">{errors.due_date}</p>}
                         </div>
 
                         <div className="grid gap-2">

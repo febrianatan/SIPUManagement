@@ -53,7 +53,7 @@ export interface Project {
     id: number;
     name: string;
     description: string | null;
-    status: 'active' | 'completed' | 'on_hold' | 'cancelled';
+    status: 'active' | 'completed' | 'on_hold' | 'cancelled' | 'archived';
     created_by: number | null;
     start_date: string | null;
     due_date: string | null;

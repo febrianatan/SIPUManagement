@@ -99,7 +99,7 @@ export default function TasksIndex({ tasks, projects, users }: Props) {
                                             className="grid grid-cols-12 items-center gap-4 p-4 transition-colors hover:bg-muted/50"
                                         >
                                             <div className="col-span-5 md:col-span-6">
-                                                <span className="font-medium hover:underline">{task.title}</span>
+                                                <span className="font-medium hover:underline">{task.name}</span>
                                                 {task.project && (
                                                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                                                         Project: {task.project.name}
@@ -116,8 +116,7 @@ export default function TasksIndex({ tasks, projects, users }: Props) {
                                                 {getPriorityBadge(task.priority)}
                                             </div>
                                             <div className="col-span-4 md:col-span-2 flex items-center justify-end text-sm text-muted-foreground gap-1.5">
-                                                <Calendar className="h-3.5 w-3.5" />
-                                                {task.due_at ? new Date(task.due_at).toLocaleDateString() : 'No date'}
+                                                {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No date'}
                                             </div>
                                         </Link>
                                     ))}

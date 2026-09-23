@@ -21,7 +21,7 @@ export default function TaskShow({ task }: Props) {
             href: '/tasks',
         },
         {
-            title: task.title,
+            title: task.name,
             href: `/tasks/${task.id}`,
         },
     ];
@@ -58,7 +58,7 @@ export default function TaskShow({ task }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={task.title} />
+            <Head title={task.name} />
 
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
                 {/* Header Section */}
@@ -71,7 +71,7 @@ export default function TaskShow({ task }: Props) {
                         </Button>
                         <div>
                             <div className="flex items-center gap-3">
-                                <h1 className="text-3xl font-bold tracking-tight">{task.title}</h1>
+                                <h1 className="text-3xl font-bold tracking-tight">{task.name}</h1>
                                 {getPriorityBadge(task.priority)}
                             </div>
                             <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
@@ -180,7 +180,7 @@ export default function TaskShow({ task }: Props) {
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Due</span>
                                             <span className="font-medium text-destructive">
-                                                {task.due_at ? new Date(task.due_at).toLocaleDateString() : 'No date'}
+                                                {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No date'}
                                             </span>
                                         </div>
                                     </div>
