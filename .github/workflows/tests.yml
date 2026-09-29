@@ -50,11 +50,15 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Tests
-        run: php artisan test --without-tty
+      - name: Migrate Database
+        run: php artisan migrate --force
 
-      - name: Report Failure
-        if: failure()
-        run: |
-          echo "### Tests Failed" >> $GITHUB_STEP_SUMMARY
-          php artisan test --without-tty >> $GITHUB_STEP_SUMMARY 2>&1 || true
+      - name: Tests
+        run: php artisan test --without-tty 2>&1 | tee test-output.txt
+
+      - name: Upload Test Output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: test-output.txt
