@@ -15,6 +15,17 @@ interface Props {
     formData: TaskFormData;
 }
 
+interface TaskEditForm {
+    [key: string]: any;
+    title: string;
+    description: string;
+    priority: Task['priority'];
+    due_at: string;
+    project_id: string;
+    requires_review: boolean;
+    assignee_ids: number[];
+}
+
 export default function TaskEdit({ task, formData }: Props) {
     const { projects = [], assignees = [] } = formData;
 
@@ -28,7 +39,7 @@ export default function TaskEdit({ task, formData }: Props) {
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
 
-    const { data, setData, patch, processing, errors, transform } = useForm({
+    const { data, setData, patch, processing, errors, transform } = useForm<TaskEditForm>({
         title: task.title || task.name || '',
         description: task.description || '',
         priority: task.priority || 'medium',
@@ -146,7 +157,7 @@ export default function TaskEdit({ task, formData }: Props) {
                                     <Label htmlFor="priority" className="text-sm font-semibold">
                                         Tingkat Prioritas <span className="text-red-500">*</span>
                                     </Label>
-                                    <Select value={data.priority} onValueChange={(val) => setData('priority', val)}>
+                                    <Select value={data.priority} onValueChange={(val) => setData('priority', val as Task['priority'])}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Pilih prioritas" />
                                         </SelectTrigger>
@@ -223,7 +234,7 @@ export default function TaskEdit({ task, formData }: Props) {
                                 <Checkbox
                                     id="edit_requires_review"
                                     checked={data.requires_review}
-                                    onCheckedChange={(checked) => setData('requires_review', checked as boolean)}
+                                    onCheckedChange={(checked) => setData('requires_review', Boolean(checked))}
                                 />
                                 <div className="space-y-0.5">
                                     <Label htmlFor="edit_requires_review" className="cursor-pointer text-sm font-semibold">

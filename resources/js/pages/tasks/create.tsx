@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { TaskFormData, type BreadcrumbItem } from '@/types';
+import { Task, TaskFormData, type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckSquare, Save } from 'lucide-react';
 import { FormEventHandler } from 'react';
@@ -25,17 +25,28 @@ interface Props {
     formData: TaskFormData;
 }
 
+interface TaskCreateForm {
+    [key: string]: any;
+    title: string;
+    description: string;
+    priority: Task['priority'];
+    due_at: string;
+    project_id: string;
+    requires_review: boolean;
+    assignee_ids: number[];
+}
+
 export default function TaskCreate({ formData }: Props) {
     const { projects = [], assignees = [], options } = formData;
 
-    const { data, setData, post, processing, errors, transform } = useForm({
+    const { data, setData, post, processing, errors, transform } = useForm<TaskCreateForm>({
         title: '',
         description: '',
         priority: 'medium',
         due_at: '',
         project_id: 'none',
         requires_review: false,
-        assignee_ids: [] as number[],
+        assignee_ids: [],
     });
 
     const handleSubmit: FormEventHandler = (e) => {
@@ -131,7 +142,7 @@ export default function TaskCreate({ formData }: Props) {
                                     <Label htmlFor="priority" className="text-sm font-semibold">
                                         Tingkat Prioritas <span className="text-red-500">*</span>
                                     </Label>
-                                    <Select value={data.priority} onValueChange={(val) => setData('priority', val)}>
+                                    <Select value={data.priority} onValueChange={(val) => setData('priority', val as Task['priority'])}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Pilih prioritas" />
                                         </SelectTrigger>
@@ -211,7 +222,7 @@ export default function TaskCreate({ formData }: Props) {
                                 <Checkbox
                                     id="requires_review"
                                     checked={data.requires_review}
-                                    onCheckedChange={(checked) => setData('requires_review', checked as boolean)}
+                                    onCheckedChange={(checked) => setData('requires_review', Boolean(checked))}
                                 />
                                 <div className="space-y-0.5">
                                     <Label htmlFor="requires_review" className="cursor-pointer text-sm font-semibold">

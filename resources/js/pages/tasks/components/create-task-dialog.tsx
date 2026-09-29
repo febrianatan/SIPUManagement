@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Project, User } from '@/types';
+import { Project, Task, User } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -16,15 +16,26 @@ interface Props {
     defaultProjectId?: number | null;
 }
 
+interface TaskDialogForm {
+    [key: string]: any;
+    title: string;
+    description: string;
+    priority: Task['priority'];
+    due_at: string;
+    project_id: string;
+    requires_review: boolean;
+    assignee_ids: number[];
+}
+
 export function CreateTaskDialog({ open, onOpenChange, projects, users, defaultProjectId }: Props) {
-    const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm({
+    const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm<TaskDialogForm>({
         title: '',
         description: '',
         priority: 'medium',
         due_at: '',
         project_id: defaultProjectId ? defaultProjectId.toString() : 'none',
         requires_review: false,
-        assignee_ids: [] as number[],
+        assignee_ids: [],
     });
 
     const handleSubmit: FormEventHandler = (e) => {
@@ -112,7 +123,7 @@ export function CreateTaskDialog({ open, onOpenChange, projects, users, defaultP
                                 <Label htmlFor="priority" className="font-semibold">
                                     Prioritas <span className="text-red-500">*</span>
                                 </Label>
-                                <Select value={data.priority} onValueChange={(val) => setData('priority', val)}>
+                                <Select value={data.priority} onValueChange={(val) => setData('priority', val as Task['priority'])}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Pilih prioritas" />
                                     </SelectTrigger>
@@ -188,7 +199,7 @@ export function CreateTaskDialog({ open, onOpenChange, projects, users, defaultP
                             <Checkbox
                                 id="requires_review"
                                 checked={data.requires_review}
-                                onCheckedChange={(checked) => setData('requires_review', checked as boolean)}
+                                onCheckedChange={(checked) => setData('requires_review', Boolean(checked))}
                             />
                             <div className="space-y-0.5">
                                 <Label htmlFor="requires_review" className="cursor-pointer text-xs font-semibold">
