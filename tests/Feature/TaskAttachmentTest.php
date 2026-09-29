@@ -105,13 +105,12 @@ class TaskAttachmentTest extends TestCase
                     $task
                 ),
                 [
-                    'file' =>
-                        UploadedFile::fake()
-                            ->create(
-                                'report.pdf',
-                                200,
-                                'application/pdf'
-                            ),
+                    'file' => UploadedFile::fake()
+                        ->create(
+                            'report.pdf',
+                            200,
+                            'application/pdf'
+                        ),
                 ]
             );
 
@@ -154,9 +153,8 @@ class TaskAttachmentTest extends TestCase
                     $task
                 ),
                 [
-                    'file' =>
-                        UploadedFile::fake()
-                            ->image('photo.png'),
+                    'file' => UploadedFile::fake()
+                        ->image('photo.png'),
                 ]
             );
 
@@ -196,8 +194,8 @@ class TaskAttachmentTest extends TestCase
 
         $path =
             'task-attachments/'
-            . $task->id
-            . '/example.pdf';
+            .$task->id
+            .'/example.pdf';
 
         Storage::disk('local')->put(
             $path,
@@ -206,20 +204,15 @@ class TaskAttachmentTest extends TestCase
 
         $attachment =
             $task->attachments()->create([
-                'uploaded_by' =>
-                    $assignee->id,
+                'uploaded_by' => $assignee->id,
 
-                'original_name' =>
-                    'example.pdf',
+                'original_name' => 'example.pdf',
 
-                'path' =>
-                    $path,
+                'path' => $path,
 
-                'mime_type' =>
-                    'application/pdf',
+                'mime_type' => 'application/pdf',
 
-                'size' =>
-                    12,
+                'size' => 12,
             ]);
 
         $response = $this
@@ -229,8 +222,7 @@ class TaskAttachmentTest extends TestCase
                     'tasks.attachments.destroy',
                     [
                         'task' => $task,
-                        'attachment' =>
-                            $attachment,
+                        'attachment' => $attachment,
                     ]
                 )
             );
@@ -285,20 +277,15 @@ class TaskAttachmentTest extends TestCase
 
         $attachment =
             $task->attachments()->create([
-                'uploaded_by' =>
-                    $assigneeA->id,
+                'uploaded_by' => $assigneeA->id,
 
-                'original_name' =>
-                    'proof.png',
+                'original_name' => 'proof.png',
 
-                'path' =>
-                    'task-attachments/test/proof.png',
+                'path' => 'task-attachments/test/proof.png',
 
-                'mime_type' =>
-                    'image/png',
+                'mime_type' => 'image/png',
 
-                'size' =>
-                    100,
+                'size' => 100,
             ]);
 
         $response = $this
@@ -308,8 +295,7 @@ class TaskAttachmentTest extends TestCase
                     'tasks.attachments.destroy',
                     [
                         'task' => $task,
-                        'attachment' =>
-                            $attachment,
+                        'attachment' => $attachment,
                     ]
                 )
             );
@@ -341,8 +327,8 @@ class TaskAttachmentTest extends TestCase
 
         $path =
             'task-attachments/'
-            . $task->id
-            . '/report.pdf';
+            .$task->id
+            .'/report.pdf';
 
         Storage::disk('local')->put(
             $path,
@@ -351,20 +337,15 @@ class TaskAttachmentTest extends TestCase
 
         $attachment =
             $task->attachments()->create([
-                'uploaded_by' =>
-                    $creator->id,
+                'uploaded_by' => $creator->id,
 
-                'original_name' =>
-                    'report.pdf',
+                'original_name' => 'report.pdf',
 
-                'path' =>
-                    $path,
+                'path' => $path,
 
-                'mime_type' =>
-                    'application/pdf',
+                'mime_type' => 'application/pdf',
 
-                'size' =>
-                    11,
+                'size' => 11,
             ]);
 
         $response = $this
@@ -374,8 +355,7 @@ class TaskAttachmentTest extends TestCase
                     'tasks.attachments.download',
                     [
                         'task' => $task,
-                        'attachment' =>
-                            $attachment,
+                        'attachment' => $attachment,
                     ]
                 )
             );
@@ -410,11 +390,10 @@ class TaskAttachmentTest extends TestCase
                     $task
                 ),
                 [
-                    'file' =>
-                        UploadedFile::fake()
-                            ->image(
-                                'evidence.png'
-                            ),
+                    'file' => UploadedFile::fake()
+                        ->image(
+                            'evidence.png'
+                        ),
                 ]
             )
             ->assertSessionHasNoErrors();
@@ -422,14 +401,11 @@ class TaskAttachmentTest extends TestCase
         $this->assertDatabaseHas(
             'task_activities',
             [
-                'task_id' =>
-                    $task->id,
+                'task_id' => $task->id,
 
-                'actor_id' =>
-                    $creator->id,
+                'actor_id' => $creator->id,
 
-                'action' =>
-                    'attachment_added',
+                'action' => 'attachment_added',
             ]
         );
     }

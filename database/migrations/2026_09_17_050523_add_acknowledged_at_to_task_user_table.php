@@ -17,6 +17,7 @@ return new class extends Migration
                 ->after('user_id');
         });
     }
+
     /**
      * Reverse the migrations.
      */

@@ -15,31 +15,24 @@ class TaskActivityFormatter
             ?? 'System';
 
         return [
-            'id' =>
-                $activity->id,
+            'id' => $activity->id,
 
-            'action' =>
-                $activity->action,
+            'action' => $activity->action,
 
             'actor' => [
-                'id' =>
-                    $activity->actor_id,
+                'id' => $activity->actor_id,
 
-                'name' =>
-                    $actor,
+                'name' => $actor,
             ],
 
-            'message' =>
-                $this->message(
-                    $activity,
-                    $actor
-                ),
+            'message' => $this->message(
+                $activity,
+                $actor
+            ),
 
-            'metadata' =>
-                $activity->metadata,
+            'metadata' => $activity->metadata,
 
-            'created_at' =>
-                $activity->created_at,
+            'created_at' => $activity->created_at,
         ];
     }
 
@@ -51,47 +44,38 @@ class TaskActivityFormatter
             $activity->metadata ?? [];
 
         return match ($activity->action) {
-            'task_created' =>
-                "{$actor} created this task.",
+            'task_created' => "{$actor} created this task.",
 
-            'task_acknowledged' =>
-                "{$actor} acknowledged this task.",
+            'task_acknowledged' => "{$actor} acknowledged this task.",
 
-            'status_changed' =>
-                $this->statusChangedMessage(
-                    $actor,
-                    $metadata
-                ),
+            'status_changed' => $this->statusChangedMessage(
+                $actor,
+                $metadata
+            ),
 
-            'comment_added' =>
-                "{$actor} added a comment.",
+            'comment_added' => "{$actor} added a comment.",
 
-            'task_updated' =>
-                $this->taskUpdatedMessage(
-                    $actor,
-                    $metadata
-                ),
+            'task_updated' => $this->taskUpdatedMessage(
+                $actor,
+                $metadata
+            ),
 
-            'assignees_changed' =>
-                $this->assigneesChangedMessage(
-                    $actor,
-                    $metadata
-                ),
+            'assignees_changed' => $this->assigneesChangedMessage(
+                $actor,
+                $metadata
+            ),
 
-            'attachment_added' =>
-                $this->attachmentAddedMessage(
-                    $actor,
-                    $metadata
-                ),
+            'attachment_added' => $this->attachmentAddedMessage(
+                $actor,
+                $metadata
+            ),
 
-            'attachment_deleted' =>
-                $this->attachmentDeletedMessage(
-                    $actor,
-                    $metadata
-                ),
+            'attachment_deleted' => $this->attachmentDeletedMessage(
+                $actor,
+                $metadata
+            ),
 
-            default =>
-                "{$actor} updated this task.",
+            default => "{$actor} updated this task.",
         };
     }
 
@@ -125,8 +109,7 @@ class TaskActivityFormatter
             array_keys($changes)
         )
             ->map(
-                fn (string $field) =>
-                    $this->fieldLabel($field)
+                fn (string $field) => $this->fieldLabel($field)
             )
             ->implode(', ');
 
@@ -158,13 +141,13 @@ class TaskActivityFormatter
         if ($added->isNotEmpty()) {
             $parts[] =
                 'added '
-                . $added->implode(', ');
+                .$added->implode(', ');
         }
 
         if ($removed->isNotEmpty()) {
             $parts[] =
                 'removed '
-                . $removed->implode(', ');
+                .$removed->implode(', ');
         }
 
         if (empty($parts)) {
@@ -172,8 +155,8 @@ class TaskActivityFormatter
         }
 
         return "{$actor} "
-            . implode(' and ', $parts)
-            . '.';
+            .implode(' and ', $parts)
+            .'.';
     }
 
     private function attachmentAddedMessage(
@@ -202,23 +185,17 @@ class TaskActivityFormatter
         ?string $status
     ): string {
         return match ($status) {
-            'todo' =>
-                'To Do',
+            'todo' => 'To Do',
 
-            'in_progress' =>
-                'In Progress',
+            'in_progress' => 'In Progress',
 
-            'review' =>
-                'Review',
+            'review' => 'Review',
 
-            'done' =>
-                'Done',
+            'done' => 'Done',
 
-            null =>
-                '-',
+            null => '-',
 
-            default =>
-                $status,
+            default => $status,
         };
     }
 
@@ -226,30 +203,23 @@ class TaskActivityFormatter
         string $field
     ): string {
         return match ($field) {
-            'project_id' =>
-                'project',
+            'project_id' => 'project',
 
-            'title' =>
-                'title',
+            'title' => 'title',
 
-            'description' =>
-                'description',
+            'description' => 'description',
 
-            'priority' =>
-                'priority',
+            'priority' => 'priority',
 
-            'due_at' =>
-                'due date',
+            'due_at' => 'due date',
 
-            'requires_review' =>
-                'review requirement',
+            'requires_review' => 'review requirement',
 
-            default =>
-                str_replace(
-                    '_',
-                    ' ',
-                    $field
-                ),
+            default => str_replace(
+                '_',
+                ' ',
+                $field
+            ),
         };
     }
 }

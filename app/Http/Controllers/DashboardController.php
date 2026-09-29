@@ -94,10 +94,9 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'done')
                 ->count(),
 
-            'pending_acknowledgement' =>
-                (clone $pendingAcknowledgementQuery)
-                    ->where('status', '!=', 'done')
-                    ->count(),
+            'pending_acknowledgement' => (clone $pendingAcknowledgementQuery)
+                ->where('status', '!=', 'done')
+                ->count(),
 
             'in_progress' => (clone $assignedTasksQuery)
                 ->where('status', 'in_progress')
@@ -190,8 +189,7 @@ class DashboardController extends Controller
         return Inertia::render('dashboard', [
             'stats' => $stats,
 
-            'pendingAcknowledgements' =>
-                $pendingAcknowledgements,
+            'pendingAcknowledgements' => $pendingAcknowledgements,
 
             'urgentTasks' => $urgentTasks,
 

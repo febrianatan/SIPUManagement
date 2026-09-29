@@ -19,28 +19,22 @@ class TaskActivityFormatterTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Daily Report',
+            'title' => 'Daily Report',
 
-            'status' =>
-                'review',
+            'status' => 'review',
 
-            'priority' =>
-                'high',
+            'priority' => 'high',
         ]);
 
         $task->recordActivity(
             'status_changed',
             $creator,
             [
-                'from' =>
-                    'in_progress',
+                'from' => 'in_progress',
 
-                'to' =>
-                    'review',
+                'to' => 'review',
             ]
         );
 
@@ -80,24 +74,19 @@ class TaskActivityFormatterTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Check Server',
+            'title' => 'Check Server',
 
-            'status' =>
-                'todo',
+            'status' => 'todo',
 
-            'priority' =>
-                'medium',
+            'priority' => 'medium',
         ]);
 
         $task->assignees()->attach(
             $assignee->id,
             [
-                'acknowledged_at' =>
-                    now(),
+                'acknowledged_at' => now(),
             ]
         );
 
@@ -134,17 +123,13 @@ class TaskActivityFormatterTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Fix Printer',
+            'title' => 'Fix Printer',
 
-            'status' =>
-                'todo',
+            'status' => 'todo',
 
-            'priority' =>
-                'high',
+            'priority' => 'high',
         ]);
 
         $task->recordActivity(
@@ -153,8 +138,7 @@ class TaskActivityFormatterTest extends TestCase
             [
                 'attachment_id' => 1,
 
-                'original_name' =>
-                    'printer-error.png',
+                'original_name' => 'printer-error.png',
             ]
         );
 
@@ -186,17 +170,13 @@ class TaskActivityFormatterTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Old Task',
+            'title' => 'Old Task',
 
-            'status' =>
-                'todo',
+            'status' => 'todo',
 
-            'priority' =>
-                'medium',
+            'priority' => 'medium',
         ]);
 
         $task->recordActivity(
@@ -205,19 +185,15 @@ class TaskActivityFormatterTest extends TestCase
             [
                 'changes' => [
                     'title' => [
-                        'from' =>
-                            'Old Task',
+                        'from' => 'Old Task',
 
-                        'to' =>
-                            'New Task',
+                        'to' => 'New Task',
                     ],
 
                     'priority' => [
-                        'from' =>
-                            'medium',
+                        'from' => 'medium',
 
-                        'to' =>
-                            'high',
+                        'to' => 'high',
                     ],
                 ],
             ]
@@ -250,17 +226,13 @@ class TaskActivityFormatterTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Task Detail',
+            'title' => 'Task Detail',
 
-            'status' =>
-                'todo',
+            'status' => 'todo',
 
-            'priority' =>
-                'medium',
+            'priority' => 'medium',
         ]);
 
         $response = $this

@@ -15,17 +15,6 @@ interface Props {
     formData: TaskFormData;
 }
 
-interface TaskEditForm {
-    [key: string]: any;
-    title: string;
-    description: string;
-    priority: Task['priority'];
-    due_at: string;
-    project_id: string;
-    requires_review: boolean;
-    assignee_ids: number[];
-}
-
 export default function TaskEdit({ task, formData }: Props) {
     const { projects = [], assignees = [] } = formData;
 
@@ -39,10 +28,10 @@ export default function TaskEdit({ task, formData }: Props) {
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
 
-    const { data, setData, patch, processing, errors, transform } = useForm<TaskEditForm>({
+    const { data, setData, patch, processing, errors, transform } = useForm({
         title: task.title || task.name || '',
         description: task.description || '',
-        priority: task.priority || 'medium',
+        priority: (task.priority || 'medium') as Task['priority'],
         due_at: formatDateTimeLocal(task.due_at || task.due_date || null),
         project_id: task.project_id ? task.project_id.toString() : 'none',
         requires_review: Boolean(task.requires_review),

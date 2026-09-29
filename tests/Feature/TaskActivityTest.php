@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature;
 
 use App\Models\Task;
@@ -22,9 +23,9 @@ class TaskActivityTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Perbaiki PC FO',
-            'status'     => 'todo',
-            'priority'   => 'high',
+            'title' => 'Perbaiki PC FO',
+            'status' => 'todo',
+            'priority' => 'high',
         ]);
 
         $task->assignees()->attach(
@@ -78,9 +79,9 @@ class TaskActivityTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Check Server',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Check Server',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $task->assignees()->attach(
@@ -97,9 +98,9 @@ class TaskActivityTest extends TestCase
         $this->assertDatabaseHas(
             'task_activities',
             [
-                'task_id'  => $task->id,
+                'task_id' => $task->id,
                 'actor_id' => $assignee->id,
-                'action'   => 'task_acknowledged',
+                'action' => 'task_acknowledged',
             ]
         );
     }
@@ -112,9 +113,9 @@ class TaskActivityTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Printer Error',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Printer Error',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $response = $this
@@ -131,9 +132,9 @@ class TaskActivityTest extends TestCase
         $this->assertDatabaseHas(
             'task_activities',
             [
-                'task_id'  => $task->id,
+                'task_id' => $task->id,
                 'actor_id' => $creator->id,
-                'action'   => 'comment_added',
+                'action' => 'comment_added',
             ]
         );
     }
@@ -150,9 +151,9 @@ class TaskActivityTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Daily Report',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Daily Report',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $task->assignees()->attach(
@@ -194,11 +195,11 @@ class TaskActivityTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by'  => $creator->id,
-            'title'       => 'Perbaiki PC FO',
+            'created_by' => $creator->id,
+            'title' => 'Perbaiki PC FO',
             'description' => 'PC bermasalah.',
-            'status'      => 'todo',
-            'priority'    => 'medium',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $task->assignees()->attach(
@@ -210,11 +211,11 @@ class TaskActivityTest extends TestCase
             ->patch(
                 route('tasks.update', $task),
                 [
-                    'project_id'   => null,
-                    'title'        => 'Perbaiki PC Front Office',
-                    'description'  => 'PC tidak dapat boot.',
-                    'priority'     => 'urgent',
-                    'due_at'       => null,
+                    'project_id' => null,
+                    'title' => 'Perbaiki PC Front Office',
+                    'description' => 'PC tidak dapat boot.',
+                    'priority' => 'urgent',
+                    'due_at' => null,
                     'assignee_ids' => [
                         $assignee->id,
                     ],
@@ -267,9 +268,9 @@ class TaskActivityTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Setup Network',
-            'status'     => 'todo',
-            'priority'   => 'high',
+            'title' => 'Setup Network',
+            'status' => 'todo',
+            'priority' => 'high',
         ]);
 
         $task->assignees()->attach(
@@ -281,11 +282,11 @@ class TaskActivityTest extends TestCase
             ->patch(
                 route('tasks.update', $task),
                 [
-                    'project_id'   => null,
-                    'title'        => 'Setup Network',
-                    'description'  => null,
-                    'priority'     => 'high',
-                    'due_at'       => null,
+                    'project_id' => null,
+                    'title' => 'Setup Network',
+                    'description' => null,
+                    'priority' => 'high',
+                    'due_at' => null,
                     'assignee_ids' => [
                         $newAssignee->id,
                     ],
@@ -335,9 +336,9 @@ class TaskActivityTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Daily Report',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Daily Report',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $task->assignees()->attach(
@@ -359,11 +360,11 @@ class TaskActivityTest extends TestCase
             ->patch(
                 route('tasks.update', $task),
                 [
-                    'project_id'   => null,
-                    'title'        => 'Daily Report Updated',
-                    'description'  => null,
-                    'priority'     => 'high',
-                    'due_at'       => null,
+                    'project_id' => null,
+                    'title' => 'Daily Report Updated',
+                    'description' => null,
+                    'priority' => 'high',
+                    'due_at' => null,
                     'assignee_ids' => [
                         $assignee->id,
                     ],
@@ -404,9 +405,9 @@ class TaskActivityTest extends TestCase
 
         $task = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Check Network',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Check Network',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $task->assignees()->attach(
@@ -418,11 +419,11 @@ class TaskActivityTest extends TestCase
             ->patch(
                 route('tasks.update', $task),
                 [
-                    'project_id'   => null,
-                    'title'        => 'Check Network',
-                    'description'  => null,
-                    'priority'     => 'medium',
-                    'due_at'       => null,
+                    'project_id' => null,
+                    'title' => 'Check Network',
+                    'description' => null,
+                    'priority' => 'medium',
+                    'due_at' => null,
                     'assignee_ids' => [
                         $oldAssignee->id,
                         $newAssignee->id,

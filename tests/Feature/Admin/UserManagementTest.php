@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Admin;
 
 use App\Models\Department;
@@ -24,21 +25,21 @@ class UserManagementTest extends TestCase
         $response = $this
             ->actingAs($admin)
             ->post(route('admin.users.store'), [
-                'name'                  => 'Test Staff',
-                'email'                 => 'staff@sipu.com',
-                'password'              => 'password123',
+                'name' => 'Test Staff',
+                'email' => 'staff@sipu.com',
+                'password' => 'password123',
                 'password_confirmation' => 'password123',
-                'department_id'         => $department->id,
-                'role'                  => 'staff',
+                'department_id' => $department->id,
+                'role' => 'staff',
             ]);
 
         $response->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('users', [
-            'name'          => 'Test Staff',
-            'email'         => 'staff@sipu.com',
+            'name' => 'Test Staff',
+            'email' => 'staff@sipu.com',
             'department_id' => $department->id,
-            'role'          => 'staff',
+            'role' => 'staff',
         ]);
     }
 
@@ -51,11 +52,11 @@ class UserManagementTest extends TestCase
         $response = $this
             ->actingAs($staff)
             ->post(route('admin.users.store'), [
-                'name'                  => 'Another Staff',
-                'email'                 => 'another@sipu.com',
-                'password'              => 'password123',
+                'name' => 'Another Staff',
+                'email' => 'another@sipu.com',
+                'password' => 'password123',
                 'password_confirmation' => 'password123',
-                'role'                  => 'staff',
+                'role' => 'staff',
             ]);
 
         $response->assertForbidden();
@@ -77,28 +78,28 @@ class UserManagementTest extends TestCase
         ]);
 
         $staff = User::factory()->create([
-            'name'  => 'Old Name',
+            'name' => 'Old Name',
             'email' => 'old@sipu.com',
-            'role'  => 'staff',
+            'role' => 'staff',
         ]);
 
         $response = $this
             ->actingAs($admin)
             ->patch(route('admin.users.update', $staff), [
-                'name'                  => 'Updated Staff',
-                'email'                 => 'updated@sipu.com',
-                'department_id'         => $department->id,
-                'role'                  => 'staff',
-                'password'              => '',
+                'name' => 'Updated Staff',
+                'email' => 'updated@sipu.com',
+                'department_id' => $department->id,
+                'role' => 'staff',
+                'password' => '',
                 'password_confirmation' => '',
             ]);
 
         $response->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('users', [
-            'id'            => $staff->id,
-            'name'          => 'Updated Staff',
-            'email'         => 'updated@sipu.com',
+            'id' => $staff->id,
+            'name' => 'Updated Staff',
+            'email' => 'updated@sipu.com',
             'department_id' => $department->id,
         ]);
     }

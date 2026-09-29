@@ -172,17 +172,13 @@ class TaskFormDataTest extends TestCase
             ->post(
                 route('tasks.store'),
                 [
-                    'project_id' =>
-                        $privateProject->id,
+                    'project_id' => $privateProject->id,
 
-                    'title' =>
-                        'Injected Task',
+                    'title' => 'Injected Task',
 
-                    'description' =>
-                        'Should not be created',
+                    'description' => 'Should not be created',
 
-                    'priority' =>
-                        'high',
+                    'priority' => 'high',
 
                     'assignee_ids' => [
                         $assignee->id,
@@ -195,8 +191,7 @@ class TaskFormDataTest extends TestCase
         $this->assertDatabaseMissing(
             'tasks',
             [
-                'title' =>
-                    'Injected Task',
+                'title' => 'Injected Task',
             ]
         );
     }
@@ -216,11 +211,9 @@ class TaskFormDataTest extends TestCase
             ->post(
                 route('tasks.store'),
                 [
-                    'title' =>
-                        'New Assignment',
+                    'title' => 'New Assignment',
 
-                    'priority' =>
-                        'high',
+                    'priority' => 'high',
 
                     'assignee_ids' => [
                         $assignee->id,
@@ -233,11 +226,9 @@ class TaskFormDataTest extends TestCase
         $this->assertDatabaseHas(
             'tasks',
             [
-                'title' =>
-                    'New Assignment',
+                'title' => 'New Assignment',
 
-                'status' =>
-                    'todo',
+                'status' => 'todo',
             ]
         );
     }
@@ -283,20 +274,15 @@ class TaskFormDataTest extends TestCase
                     $task
                 ),
                 [
-                    'project_id' =>
-                        $privateProject->id,
+                    'project_id' => $privateProject->id,
 
-                    'title' =>
-                        $task->title,
+                    'title' => $task->title,
 
-                    'description' =>
-                        null,
+                    'description' => null,
 
-                    'priority' =>
-                        $task->priority,
+                    'priority' => $task->priority,
 
-                    'requires_review' =>
-                        false,
+                    'requires_review' => false,
 
                     'assignee_ids' => [
                         $assignee->id,

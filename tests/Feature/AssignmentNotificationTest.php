@@ -217,8 +217,7 @@ class AssignmentNotificationTest extends TestCase
                 route(
                     'tasks.index',
                     [
-                        'acknowledgement' =>
-                            'pending',
+                        'acknowledgement' => 'pending',
                     ]
                 )
             );

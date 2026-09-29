@@ -46,7 +46,6 @@ export default function TasksIndex({
     users = [],
     filters = {},
     statusCounts = { todo: 0, in_progress: 0, review: 0, done: 0 },
-    filterOptions,
 }: Props) {
     const isPaginated = typeof tasksProp === 'object' && 'data' in tasksProp;
     const taskList: Task[] = isPaginated ? (tasksProp as Paginated<Task>).data : (tasksProp as Task[]);
@@ -59,12 +58,12 @@ export default function TasksIndex({
     const totalCount = statusCounts.todo + statusCounts.in_progress + statusCounts.review + statusCounts.done;
 
     const handleFilterChange = (key: string, value: string | null) => {
-        const newFilters = { ...filters, [key]: value };
+        const newFilters: Record<string, string | number | null | undefined> = { ...filters, [key]: value };
         if (!value || value === 'all') {
-            delete newFilters[key as keyof typeof filters];
+            delete newFilters[key];
         }
 
-        router.get(route('tasks.index'), newFilters as any, {
+        router.get(route('tasks.index'), newFilters as Record<string, string | number>, {
             preserveState: true,
             replace: true,
         });

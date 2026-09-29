@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Policies;
 
 use App\Models\Task;
@@ -6,7 +7,7 @@ use App\Models\User;
 
 class TaskPolicy
 {
-    public function before(User $user, string $ability): bool | null
+    public function before(User $user, string $ability): ?bool
     {
         if ($user->role === 'administrator') {
             return true;

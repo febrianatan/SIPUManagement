@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature;
 
 use App\Models\Department;
@@ -30,11 +31,11 @@ class ProjectManagementTest extends TestCase
         $response = $this
             ->actingAs($admin)
             ->post(route('admin.projects.store'), [
-                'name'           => 'Wedding Preparation',
-                'description'    => 'Prepare hotel wedding event',
-                'status'         => 'active',
-                'start_date'     => '2026-09-20',
-                'due_date'       => '2026-09-25',
+                'name' => 'Wedding Preparation',
+                'description' => 'Prepare hotel wedding event',
+                'status' => 'active',
+                'start_date' => '2026-09-20',
+                'due_date' => '2026-09-25',
                 'department_ids' => [
                     $engineering->id,
                     $housekeeping->id,
@@ -44,8 +45,8 @@ class ProjectManagementTest extends TestCase
         $response->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('projects', [
-            'name'       => 'Wedding Preparation',
-            'status'     => 'active',
+            'name' => 'Wedding Preparation',
+            'status' => 'active',
             'created_by' => $admin->id,
         ]);
 
@@ -55,12 +56,12 @@ class ProjectManagementTest extends TestCase
         )->firstOrFail();
 
         $this->assertDatabaseHas('department_project', [
-            'project_id'    => $project->id,
+            'project_id' => $project->id,
             'department_id' => $engineering->id,
         ]);
 
         $this->assertDatabaseHas('department_project', [
-            'project_id'    => $project->id,
+            'project_id' => $project->id,
             'department_id' => $housekeeping->id,
         ]);
     }
@@ -78,16 +79,16 @@ class ProjectManagementTest extends TestCase
         ]);
 
         $staff = User::factory()->create([
-            'role'          => 'staff',
+            'role' => 'staff',
             'department_id' => $frontOffice->id,
         ]);
 
         $response = $this
             ->actingAs($staff)
             ->post(route('projects.store'), [
-                'name'           => 'AC Room 502 Problem',
-                'description'    => 'AC room tidak dingin.',
-                'status'         => 'active',
+                'name' => 'AC Room 502 Problem',
+                'description' => 'AC room tidak dingin.',
+                'status' => 'active',
                 'department_ids' => [
                     $engineering->id,
                 ],
@@ -106,12 +107,12 @@ class ProjectManagementTest extends TestCase
         );
 
         $this->assertDatabaseHas('department_project', [
-            'project_id'    => $project->id,
+            'project_id' => $project->id,
             'department_id' => $frontOffice->id,
         ]);
 
         $this->assertDatabaseHas('department_project', [
-            'project_id'    => $project->id,
+            'project_id' => $project->id,
             'department_id' => $engineering->id,
         ]);
     }
@@ -124,12 +125,12 @@ class ProjectManagementTest extends TestCase
         ]);
 
         $staff = User::factory()->create([
-            'role'          => 'staff',
+            'role' => 'staff',
             'department_id' => $department->id,
         ]);
 
         $project = Project::create([
-            'name'   => 'Maintenance Project',
+            'name' => 'Maintenance Project',
             'status' => 'active',
         ]);
 
@@ -157,12 +158,12 @@ class ProjectManagementTest extends TestCase
         ]);
 
         $staff = User::factory()->create([
-            'role'          => 'staff',
+            'role' => 'staff',
             'department_id' => $accounting->id,
         ]);
 
         $project = Project::create([
-            'name'   => 'Engineering Project',
+            'name' => 'Engineering Project',
             'status' => 'active',
         ]);
 
@@ -185,18 +186,18 @@ class ProjectManagementTest extends TestCase
         ]);
 
         $creator = User::factory()->create([
-            'role'          => 'staff',
+            'role' => 'staff',
             'department_id' => $department->id,
         ]);
 
         $otherStaff = User::factory()->create([
-            'role'          => 'staff',
+            'role' => 'staff',
             'department_id' => $department->id,
         ]);
 
         $project = Project::create([
-            'name'       => 'Original Project',
-            'status'     => 'active',
+            'name' => 'Original Project',
+            'status' => 'active',
             'created_by' => $creator->id,
         ]);
 
@@ -207,8 +208,8 @@ class ProjectManagementTest extends TestCase
         $response = $this
             ->actingAs($otherStaff)
             ->patch(route('projects.update', $project), [
-                'name'           => 'Hacked Project',
-                'status'         => 'active',
+                'name' => 'Hacked Project',
+                'status' => 'active',
                 'department_ids' => [
                     $department->id,
                 ],
@@ -217,7 +218,7 @@ class ProjectManagementTest extends TestCase
         $response->assertForbidden();
 
         $this->assertDatabaseHas('projects', [
-            'id'   => $project->id,
+            'id' => $project->id,
             'name' => 'Original Project',
         ]);
     }

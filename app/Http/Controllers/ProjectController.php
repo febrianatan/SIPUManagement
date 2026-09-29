@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Models\Department;
 use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
@@ -30,7 +31,7 @@ class ProjectController extends Controller
 
         return Inertia::render('projects/index', [
             'projects' => $query->get(),
-            'departments' => \App\Models\Department::all(),
+            'departments' => Department::all(),
         ]);
     }
 
@@ -138,51 +139,41 @@ class ProjectController extends Controller
 
                 $acknowledgedCount =
                     $task->assignees
-                    ->filter(function ($assignee) {
-                        return $assignee
-                            ->pivot
-                            ->acknowledged_at !== null;
-                    })
-                    ->count();
+                        ->filter(function ($assignee) {
+                            return $assignee
+                                ->pivot
+                                ->acknowledged_at !== null;
+                        })
+                        ->count();
 
                 return [
-                    'id'                 => $task->id,
+                    'id' => $task->id,
 
-                    'title'              => $task->title,
+                    'title' => $task->title,
 
-                    'description'        =>
-                    $task->description,
+                    'description' => $task->description,
 
-                    'status'             =>
-                    $task->status,
+                    'status' => $task->status,
 
-                    'priority'           =>
-                    $task->priority,
+                    'priority' => $task->priority,
 
-                    'due_at'             =>
-                    $task->due_at,
+                    'due_at' => $task->due_at,
 
-                    'created_at'         =>
-                    $task->created_at,
+                    'created_at' => $task->created_at,
 
-                    'creator'            =>
-                    $task->creator,
+                    'creator' => $task->creator,
 
-                    'assignees'          =>
-                    $task->assignees,
+                    'assignees' => $task->assignees,
 
-                    'assignee_count'     =>
-                    $assigneeCount,
+                    'assignee_count' => $assigneeCount,
 
-                    'acknowledged_count' =>
-                    $acknowledgedCount,
+                    'acknowledged_count' => $acknowledgedCount,
 
                     /*
                      * Apakah user boleh membuka
                      * Task Detail.
                      */
-                    'can_open'           =>
-                    $user->can(
+                    'can_open' => $user->can(
                         'view',
                         $task
                     ),
@@ -190,8 +181,7 @@ class ProjectController extends Controller
                     /*
                      * Berguna untuk drag/drop Kanban.
                      */
-                    'can_update_status'  =>
-                    $user->can(
+                    'can_update_status' => $user->can(
                         'updateStatus',
                         $task
                     ),
@@ -204,41 +194,32 @@ class ProjectController extends Controller
             [
                 'project' => $project,
 
-                'stats'   => [
-                    'total_tasks'           =>
-                    $totalTasks,
+                'stats' => [
+                    'total_tasks' => $totalTasks,
 
-                    'todo'                  =>
-                    $todoTasks,
+                    'todo' => $todoTasks,
 
-                    'in_progress'           =>
-                    $inProgressTasks,
+                    'in_progress' => $inProgressTasks,
 
-                    'review'                =>
-                    $reviewTasks,
+                    'review' => $reviewTasks,
 
-                    'done'                  =>
-                    $doneTasks,
+                    'done' => $doneTasks,
 
-                    'completion_percentage' =>
-                    $completionPercentage,
+                    'completion_percentage' => $completionPercentage,
                 ],
 
-                'tasks'   =>
-                $taskSummaries,
+                'tasks' => $taskSummaries,
 
                 /*
                  * Permission Project untuk frontend.
                  */
-                'can'     => [
-                    'update' =>
-                    $user->can(
+                'can' => [
+                    'update' => $user->can(
                         'update',
                         $project
                     ),
 
-                    'delete' =>
-                    $user->can(
+                    'delete' => $user->can(
                         'delete',
                         $project
                     ),
@@ -251,30 +232,24 @@ class ProjectController extends Controller
         StoreProjectRequest $request
     ): RedirectResponse {
         $validated = $request->validated();
-        $user      = $request->user();
+        $user = $request->user();
 
         DB::transaction(function () use (
             $validated,
             $user
         ) {
             $project = Project::create([
-                'name'        =>
-                $validated['name'],
+                'name' => $validated['name'],
 
-                'description' =>
-                $validated['description'] ?? null,
+                'description' => $validated['description'] ?? null,
 
-                'status'      =>
-                $validated['status'],
+                'status' => $validated['status'],
 
-                'created_by'  =>
-                $user->id,
+                'created_by' => $user->id,
 
-                'start_date'  =>
-                $validated['start_date'] ?? null,
+                'start_date' => $validated['start_date'] ?? null,
 
-                'due_date'    =>
-                $validated['due_date'] ?? null,
+                'due_date' => $validated['due_date'] ?? null,
             ]);
 
             /*
@@ -324,20 +299,15 @@ class ProjectController extends Controller
             $project
         ) {
             $project->update([
-                'name'        =>
-                $validated['name'],
+                'name' => $validated['name'],
 
-                'description' =>
-                $validated['description'] ?? null,
+                'description' => $validated['description'] ?? null,
 
-                'status'      =>
-                $validated['status'],
+                'status' => $validated['status'],
 
-                'start_date'  =>
-                $validated['start_date'] ?? null,
+                'start_date' => $validated['start_date'] ?? null,
 
-                'due_date'    =>
-                $validated['due_date'] ?? null,
+                'due_date' => $validated['due_date'] ?? null,
             ]);
 
             $departmentIds =
@@ -355,10 +325,10 @@ class ProjectController extends Controller
              */
             $creatorDepartmentId =
                 $project
-                ->creator()
-                ->value(
-                    'department_id'
-                );
+                    ->creator()
+                    ->value(
+                        'department_id'
+                    );
 
             if ($creatorDepartmentId !== null) {
                 $departmentIds[] =

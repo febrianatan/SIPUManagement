@@ -26,7 +26,7 @@ class Project extends Model
     {
         return [
             'start_date' => 'date',
-            'due_date'   => 'date',
+            'due_date' => 'date',
         ];
     }
 

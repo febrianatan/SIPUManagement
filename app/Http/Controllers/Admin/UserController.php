@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -22,7 +23,7 @@ class UserController extends Controller
         $departments = Department::orderBy('name')->get();
 
         return Inertia::render('admin/users/index', [
-            'users'       => $users,
+            'users' => $users,
             'departments' => $departments,
         ]);
     }
@@ -32,11 +33,11 @@ class UserController extends Controller
         $validated = $request->validated();
 
         User::create([
-            'name'          => $validated['name'],
-            'email'         => $validated['email'],
-            'password'      => Hash::make($validated['password']),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
             'department_id' => $validated['department_id'] ?? null,
-            'role'          => $validated['role'],
+            'role' => $validated['role'],
         ]);
 
         return back()->with('success', 'User berhasil dibuat.');
@@ -48,10 +49,10 @@ class UserController extends Controller
     ): RedirectResponse {
         $validated = $request->validated();
 
-        $user->name          = $validated['name'];
-        $user->email         = $validated['email'];
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
         $user->department_id = $validated['department_id'] ?? null;
-        $user->role          = $validated['role'];
+        $user->role = $validated['role'];
 
         if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);

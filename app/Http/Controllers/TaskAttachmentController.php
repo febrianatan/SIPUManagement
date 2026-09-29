@@ -44,12 +44,12 @@ class TaskAttachmentController extends Controller
          */
         $storedName =
             Str::uuid()->toString()
-            . '.'
-            . strtolower($extension);
+            .'.'
+            .strtolower($extension);
 
         $directory =
             'task-attachments/'
-            . $task->id;
+            .$task->id;
 
         $path = Storage::disk('local')
             ->putFileAs(
@@ -60,8 +60,7 @@ class TaskAttachmentController extends Controller
 
         if ($path === false) {
             return back()->withErrors([
-                'file' =>
-                    'Attachment gagal disimpan.',
+                'file' => 'Attachment gagal disimpan.',
             ]);
         }
 
@@ -74,41 +73,32 @@ class TaskAttachmentController extends Controller
             ) {
                 $attachment =
                     $task->attachments()->create([
-                        'uploaded_by' =>
-                            $request->user()->id,
+                        'uploaded_by' => $request->user()->id,
 
-                        'original_name' =>
-                            $file
-                                ->getClientOriginalName(),
+                        'original_name' => $file
+                            ->getClientOriginalName(),
 
-                        'path' =>
-                            $path,
+                        'path' => $path,
 
-                        'mime_type' =>
-                            $file->getMimeType(),
+                        'mime_type' => $file->getMimeType(),
 
-                        'size' =>
-                            $file->getSize(),
+                        'size' => $file->getSize(),
                     ]);
 
                 $task->recordActivity(
                     'attachment_added',
                     $request->user(),
                     [
-                        'attachment_id' =>
-                            $attachment->id,
+                        'attachment_id' => $attachment->id,
 
-                        'original_name' =>
-                            $attachment
-                                ->original_name,
+                        'original_name' => $attachment
+                            ->original_name,
 
-                        'mime_type' =>
-                            $attachment
-                                ->mime_type,
+                        'mime_type' => $attachment
+                            ->mime_type,
 
-                        'size' =>
-                            $attachment
-                                ->size,
+                        'size' => $attachment
+                            ->size,
                     ]
                 );
             });
@@ -192,11 +182,9 @@ class TaskAttachmentController extends Controller
                 'attachment_deleted',
                 request()->user(),
                 [
-                    'attachment_id' =>
-                        $attachmentId,
+                    'attachment_id' => $attachmentId,
 
-                    'original_name' =>
-                        $originalName,
+                    'original_name' => $originalName,
                 ]
             );
 

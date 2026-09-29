@@ -13,16 +13,8 @@ interface ResetPasswordProps {
     email: string;
 }
 
-interface ResetPasswordForm {
-    token: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-    [key: string]: any;
-}
-
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<ResetPasswordForm>({
+    const { data, setData, post, processing, errors, reset } = useForm({
         token: token,
         email: email,
         password: '',

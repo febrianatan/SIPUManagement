@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Requests\UpdateTaskStatusRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\User;
 use App\Services\TaskActivityFormatter;
 use App\Services\TaskFormService;
 use App\Services\TaskStatusService;
@@ -22,7 +23,7 @@ class TaskController extends Controller
     public function index(
         TaskIndexRequest $request
     ): Response {
-        $user      = $request->user();
+        $user = $request->user();
         $validated = $request->validated();
 
         /*
@@ -61,7 +62,7 @@ class TaskController extends Controller
      * Count untuk Kanban.
      */
         $statusCounts = [
-            'todo'        => (clone $baseQuery)
+            'todo' => (clone $baseQuery)
                 ->where('status', 'todo')
                 ->count(),
 
@@ -69,11 +70,11 @@ class TaskController extends Controller
                 ->where('status', 'in_progress')
                 ->count(),
 
-            'review'      => (clone $baseQuery)
+            'review' => (clone $baseQuery)
                 ->where('status', 'review')
                 ->count(),
 
-            'done'        => (clone $baseQuery)
+            'done' => (clone $baseQuery)
                 ->where('status', 'done')
                 ->count(),
         ];
@@ -124,9 +125,9 @@ class TaskController extends Controller
             ->withQueryString();
 
         return Inertia::render('tasks/index', [
-            'tasks'         => $tasks,
-            'projects'      => \App\Models\Project::select('id', 'name')->orderBy('name')->get(),
-            'users'         => \App\Models\User::select('id', 'name', 'email')->orderBy('name')->get(),
+            'tasks' => $tasks,
+            'projects' => Project::select('id', 'name')->orderBy('name')->get(),
+            'users' => User::select('id', 'name', 'email')->orderBy('name')->get(),
 
             /*
          * Filter aktif.
@@ -135,49 +136,39 @@ class TaskController extends Controller
          * supaya UI tahu filter apa yang
          * sedang aktif.
          */
-            'filters'       => [
-                'search'          =>
-                $validated['search'] ?? null,
+            'filters' => [
+                'search' => $validated['search'] ?? null,
 
-                'status'          =>
-                $validated['status'] ?? null,
+                'status' => $validated['status'] ?? null,
 
-                'priority'        =>
-                $validated['priority'] ?? null,
+                'priority' => $validated['priority'] ?? null,
 
-                'project_id'      =>
-                $validated['project_id'] ?? null,
+                'project_id' => $validated['project_id'] ?? null,
 
-                'assignee_id'     =>
-                $validated['assignee_id'] ?? null,
+                'assignee_id' => $validated['assignee_id'] ?? null,
 
                 /*
              * INI YANG TADI KETINGGALAN.
              */
-                'acknowledgement' =>
-                $validated['acknowledgement'] ?? null,
+                'acknowledgement' => $validated['acknowledgement'] ?? null,
 
-                'created_by'      =>
-                $validated['created_by'] ?? null,
+                'created_by' => $validated['created_by'] ?? null,
 
-                'due'             =>
-                $validated['due'] ?? null,
+                'due' => $validated['due'] ?? null,
 
-                'per_page'        =>
-                $perPage,
+                'per_page' => $perPage,
             ],
 
             /*
          * Count tiap status untuk Kanban.
          */
-            'statusCounts'  =>
-            $statusCounts,
+            'statusCounts' => $statusCounts,
 
             /*
          * Option untuk filter frontend.
          */
             'filterOptions' => [
-                'statuses'         => [
+                'statuses' => [
                     [
                         'value' => 'todo',
                         'label' => 'To Do',
@@ -196,7 +187,7 @@ class TaskController extends Controller
                     ],
                 ],
 
-                'priorities'       => [
+                'priorities' => [
                     [
                         'value' => 'low',
                         'label' => 'Low',
@@ -226,7 +217,7 @@ class TaskController extends Controller
                     ],
                 ],
 
-                'due'              => [
+                'due' => [
                     [
                         'value' => 'overdue',
                         'label' => 'Overdue',
@@ -303,8 +294,8 @@ class TaskController extends Controller
         $hasAcknowledged =
             $isAssignee
             && $currentAssignment
-            ->pivot
-            ->acknowledged_at !== null;
+                ->pivot
+                ->acknowledged_at !== null;
 
         /*
      * =========================================================
@@ -314,28 +305,26 @@ class TaskController extends Controller
 
         $availableStatuses =
             $taskStatusService
-            ->availableTransitions(
-                $task,
-                $user
-            );
+                ->availableTransitions(
+                    $task,
+                    $user
+                );
 
         $availableStatusOptions =
             collect($availableStatuses)
-            ->map(function (
-                string $status
-            ) use ($taskStatusService) {
-                return [
-                    'value' =>
-                    $status,
+                ->map(function (
+                    string $status
+                ) use ($taskStatusService) {
+                    return [
+                        'value' => $status,
 
-                    'label' =>
-                    $taskStatusService
-                        ->statusLabel(
-                            $status
-                        ),
-                ];
-            })
-            ->values();
+                        'label' => $taskStatusService
+                            ->statusLabel(
+                                $status
+                            ),
+                    ];
+                })
+                ->values();
 
         /*
      * =========================================================
@@ -349,20 +338,15 @@ class TaskController extends Controller
             ->values()
             ->map(function ($comment) use ($user) {
                 return [
-                    'id' =>
-                    $comment->id,
+                    'id' => $comment->id,
 
-                    'message' =>
-                    $comment->message,
+                    'message' => $comment->message,
 
-                    'created_at' =>
-                    $comment->created_at,
+                    'created_at' => $comment->created_at,
 
-                    'user' =>
-                    $comment->user,
+                    'user' => $comment->user,
 
-                    'can_delete' =>
-                    $user->can(
+                    'can_delete' => $user->can(
                         'delete',
                         $comment
                     ),
@@ -381,26 +365,19 @@ class TaskController extends Controller
             ->values()
             ->map(function ($attachment) use ($user) {
                 return [
-                    'id' =>
-                    $attachment->id,
+                    'id' => $attachment->id,
 
-                    'original_name' =>
-                    $attachment->original_name,
+                    'original_name' => $attachment->original_name,
 
-                    'mime_type' =>
-                    $attachment->mime_type,
+                    'mime_type' => $attachment->mime_type,
 
-                    'size' =>
-                    $attachment->size,
+                    'size' => $attachment->size,
 
-                    'created_at' =>
-                    $attachment->created_at,
+                    'created_at' => $attachment->created_at,
 
-                    'uploader' =>
-                    $attachment->uploader,
+                    'uploader' => $attachment->uploader,
 
-                    'can_delete' =>
-                    $user->can(
+                    'can_delete' => $user->can(
                         'delete',
                         $attachment
                     ),
@@ -416,8 +393,7 @@ class TaskController extends Controller
         $activities = $task
             ->activities
             ->map(
-                fn($activity) =>
-                $activityFormatter->format(
+                fn ($activity) => $activityFormatter->format(
                     $activity
                 )
             )
@@ -436,74 +412,57 @@ class TaskController extends Controller
              * Core Task Data.
              */
                 'task' => [
-                    'id' =>
-                    $task->id,
+                    'id' => $task->id,
 
-                    'title' =>
-                    $task->title,
+                    'title' => $task->title,
 
-                    'description' =>
-                    $task->description,
+                    'description' => $task->description,
 
-                    'status' =>
-                    $task->status,
+                    'status' => $task->status,
 
-                    'priority' =>
-                    $task->priority,
+                    'priority' => $task->priority,
 
-                    'due_at' =>
-                    $task->due_at,
+                    'due_at' => $task->due_at,
 
-                    'requires_review' =>
-                    (bool)
+                    'requires_review' => (bool)
                     $task->requires_review,
 
-                    'created_at' =>
-                    $task->created_at,
+                    'created_at' => $task->created_at,
 
-                    'updated_at' =>
-                    $task->updated_at,
+                    'updated_at' => $task->updated_at,
 
-                    'project' =>
-                    $task->project,
+                    'project' => $task->project,
 
-                    'creator' =>
-                    $task->creator,
+                    'creator' => $task->creator,
 
-                    'assignees' =>
-                    $task->assignees,
+                    'assignees' => $task->assignees,
                 ],
 
                 /*
              * Permission user terhadap Task.
              */
                 'can' => [
-                    'edit' =>
-                    $user->can(
+                    'edit' => $user->can(
                         'update',
                         $task
                     ),
 
-                    'delete' =>
-                    $user->can(
+                    'delete' => $user->can(
                         'delete',
                         $task
                     ),
 
-                    'update_status' =>
-                    $user->can(
+                    'update_status' => $user->can(
                         'updateStatus',
                         $task
                     ),
 
-                    'comment' =>
-                    $user->can(
+                    'comment' => $user->can(
                         'view',
                         $task
                     ),
 
-                    'upload_attachment' =>
-                    $user->can(
+                    'upload_attachment' => $user->can(
                         'view',
                         $task
                     ),
@@ -513,48 +472,38 @@ class TaskController extends Controller
              * Assignment user login.
              */
                 'assignment' => [
-                    'is_assignee' =>
-                    $isAssignee,
+                    'is_assignee' => $isAssignee,
 
-                    'acknowledged' =>
-                    $hasAcknowledged,
+                    'acknowledged' => $hasAcknowledged,
 
-                    'acknowledged_at' =>
-                    $currentAssignment
+                    'acknowledged_at' => $currentAssignment
                         ?->pivot
                         ?->acknowledged_at,
 
-                    'can_acknowledge' =>
-                    $isAssignee
-                        && !$hasAcknowledged,
+                    'can_acknowledge' => $isAssignee
+                        && ! $hasAcknowledged,
                 ],
 
                 /*
              * Workflow.
              */
                 'workflow' => [
-                    'requires_review' =>
-                    (bool)
+                    'requires_review' => (bool)
                     $task->requires_review,
 
-                    'current_status' =>
-                    $task->status,
+                    'current_status' => $task->status,
 
-                    'available_statuses' =>
-                    $availableStatusOptions,
+                    'available_statuses' => $availableStatusOptions,
                 ],
 
                 /*
              * Task communication/history.
              */
-                'comments' =>
-                $comments,
+                'comments' => $comments,
 
-                'attachments' =>
-                $attachments,
+                'attachments' => $attachments,
 
-                'activities' =>
-                $activities,
+                'activities' => $activities,
             ]
         );
     }
@@ -567,8 +516,7 @@ class TaskController extends Controller
         return Inertia::render(
             'tasks/create',
             [
-                'formData' =>
-                $taskFormService->forUser(
+                'formData' => $taskFormService->forUser(
                     $user
                 ),
             ]
@@ -596,8 +544,7 @@ class TaskController extends Controller
             [
                 'task' => $task,
 
-                'formData' =>
-                $taskFormService->forUser(
+                'formData' => $taskFormService->forUser(
                     $user
                 ),
             ]
@@ -617,28 +564,21 @@ class TaskController extends Controller
             $request
         ) {
             $task = Task::create([
-                'project_id'      =>
-                $validated['project_id'] ?? null,
+                'project_id' => $validated['project_id'] ?? null,
 
-                'created_by'      =>
-                $request->user()->id,
+                'created_by' => $request->user()->id,
 
-                'title'           =>
-                $validated['title'],
+                'title' => $validated['title'],
 
-                'description'     =>
-                $validated['description'] ?? null,
+                'description' => $validated['description'] ?? null,
 
-                'status'          => 'todo',
+                'status' => 'todo',
 
-                'priority'        =>
-                $validated['priority'],
+                'priority' => $validated['priority'],
 
-                'due_at'          =>
-                $validated['due_at'] ?? null,
+                'due_at' => $validated['due_at'] ?? null,
 
-                'requires_review' =>
-                $validated['requires_review'] ?? false,
+                'requires_review' => $validated['requires_review'] ?? false,
             ]);
 
             $task->assignees()->sync(
@@ -649,8 +589,7 @@ class TaskController extends Controller
                 'task_created',
                 $request->user(),
                 [
-                    'assignee_ids' =>
-                    $validated['assignee_ids'],
+                    'assignee_ids' => $validated['assignee_ids'],
                 ]
             );
         });
@@ -678,23 +617,17 @@ class TaskController extends Controller
             $request
         ) {
             $before = [
-                'project_id'      =>
-                $task->project_id,
+                'project_id' => $task->project_id,
 
-                'title'           =>
-                $task->title,
+                'title' => $task->title,
 
-                'description'     =>
-                $task->description,
+                'description' => $task->description,
 
-                'priority'        =>
-                $task->priority,
+                'priority' => $task->priority,
 
-                'due_at'          =>
-                $task->due_at?->toDateTimeString(),
+                'due_at' => $task->due_at?->toDateTimeString(),
 
-                'requires_review' =>
-                (bool) $task->requires_review,
+                'requires_review' => (bool) $task->requires_review,
             ];
 
             $oldAssignees = $task
@@ -706,23 +639,17 @@ class TaskController extends Controller
                 ->keyBy('id');
 
             $task->update([
-                'project_id'      =>
-                $validated['project_id'] ?? null,
+                'project_id' => $validated['project_id'] ?? null,
 
-                'title'           =>
-                $validated['title'],
+                'title' => $validated['title'],
 
-                'description'     =>
-                $validated['description'] ?? null,
+                'description' => $validated['description'] ?? null,
 
-                'priority'        =>
-                $validated['priority'],
+                'priority' => $validated['priority'],
 
-                'due_at'          =>
-                $validated['due_at'] ?? null,
+                'due_at' => $validated['due_at'] ?? null,
 
-                'requires_review' =>
-                $validated['requires_review'] ?? $task->requires_review,
+                'requires_review' => $validated['requires_review'] ?? $task->requires_review,
             ]);
 
             $task->assignees()->sync(
@@ -732,23 +659,17 @@ class TaskController extends Controller
             $task->refresh();
 
             $after = [
-                'project_id'      =>
-                $task->project_id,
+                'project_id' => $task->project_id,
 
-                'title'           =>
-                $task->title,
+                'title' => $task->title,
 
-                'description'     =>
-                $task->description,
+                'description' => $task->description,
 
-                'priority'        =>
-                $task->priority,
+                'priority' => $task->priority,
 
-                'due_at'          =>
-                $task->due_at?->toDateTimeString(),
+                'due_at' => $task->due_at?->toDateTimeString(),
 
-                'requires_review' =>
-                (bool) $task->requires_review,
+                'requires_review' => (bool) $task->requires_review,
             ];
 
             $changes = [];
@@ -759,7 +680,7 @@ class TaskController extends Controller
                 if ($oldValue !== $newValue) {
                     $changes[$field] = [
                         'from' => $oldValue,
-                        'to'   => $newValue,
+                        'to' => $newValue,
                     ];
                 }
             }
@@ -787,7 +708,7 @@ class TaskController extends Controller
                 ->values()
                 ->map(function ($user) {
                     return [
-                        'id'   => $user->id,
+                        'id' => $user->id,
                         'name' => $user->name,
                     ];
                 })
@@ -798,7 +719,7 @@ class TaskController extends Controller
                 ->values()
                 ->map(function ($user) {
                     return [
-                        'id'   => $user->id,
+                        'id' => $user->id,
                         'name' => $user->name,
                     ];
                 })
@@ -812,7 +733,7 @@ class TaskController extends Controller
                     'assignees_changed',
                     $request->user(),
                     [
-                        'added'   => $addedAssignees,
+                        'added' => $addedAssignees,
                         'removed' => $removedAssignees,
                     ]
                 );

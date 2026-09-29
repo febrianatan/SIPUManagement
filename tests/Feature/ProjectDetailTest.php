@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature;
 
 use App\Models\Department;
@@ -20,13 +21,13 @@ class ProjectDetailTest extends TestCase
         ]);
 
         $creator = User::factory()->create([
-            'role'          => 'staff',
+            'role' => 'staff',
             'department_id' => $department->id,
         ]);
 
         $project = Project::create([
-            'name'       => 'New Hotel System',
-            'status'     => 'active',
+            'name' => 'New Hotel System',
+            'status' => 'active',
             'created_by' => $creator->id,
         ]);
 
@@ -37,33 +38,33 @@ class ProjectDetailTest extends TestCase
         Task::create([
             'project_id' => $project->id,
             'created_by' => $creator->id,
-            'title'      => 'Todo Task',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Todo Task',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         Task::create([
             'project_id' => $project->id,
             'created_by' => $creator->id,
-            'title'      => 'Progress Task',
-            'status'     => 'in_progress',
-            'priority'   => 'high',
+            'title' => 'Progress Task',
+            'status' => 'in_progress',
+            'priority' => 'high',
         ]);
 
         Task::create([
             'project_id' => $project->id,
             'created_by' => $creator->id,
-            'title'      => 'Review Task',
-            'status'     => 'review',
-            'priority'   => 'medium',
+            'title' => 'Review Task',
+            'status' => 'review',
+            'priority' => 'medium',
         ]);
 
         Task::create([
             'project_id' => $project->id,
             'created_by' => $creator->id,
-            'title'      => 'Done Task',
-            'status'     => 'done',
-            'priority'   => 'low',
+            'title' => 'Done Task',
+            'status' => 'done',
+            'priority' => 'low',
         ]);
 
         $response = $this
@@ -78,7 +79,7 @@ class ProjectDetailTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where(
                     'stats.total_tasks',
                     4
@@ -117,25 +118,25 @@ class ProjectDetailTest extends TestCase
         ]);
 
         $project = Project::create([
-            'name'       => 'Wedding Event',
-            'status'     => 'active',
+            'name' => 'Wedding Event',
+            'status' => 'active',
             'created_by' => $user->id,
         ]);
 
         Task::create([
             'project_id' => $project->id,
             'created_by' => $user->id,
-            'title'      => 'Project Task',
-            'status'     => 'todo',
-            'priority'   => 'high',
+            'title' => 'Project Task',
+            'status' => 'todo',
+            'priority' => 'high',
         ]);
 
         Task::create([
             'project_id' => null,
             'created_by' => $user->id,
-            'title'      => 'General Task',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'General Task',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $response = $this
@@ -150,7 +151,7 @@ class ProjectDetailTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where(
                     'stats.total_tasks',
                     1
@@ -180,9 +181,8 @@ class ProjectDetailTest extends TestCase
 
         $departmentStaff =
         User::factory()->create([
-            'role'          => 'staff',
-            'department_id' =>
-            $department->id,
+            'role' => 'staff',
+            'department_id' => $department->id,
         ]);
 
         $otherAssignee =
@@ -191,10 +191,9 @@ class ProjectDetailTest extends TestCase
         ]);
 
         $project = Project::create([
-            'name'       => 'Ballroom Renovation',
-            'status'     => 'active',
-            'created_by' =>
-            $projectCreator->id,
+            'name' => 'Ballroom Renovation',
+            'status' => 'active',
+            'created_by' => $projectCreator->id,
         ]);
 
         $project
@@ -204,20 +203,15 @@ class ProjectDetailTest extends TestCase
             );
 
         $task = Task::create([
-            'project_id' =>
-            $project->id,
+            'project_id' => $project->id,
 
-            'created_by' =>
-            $projectCreator->id,
+            'created_by' => $projectCreator->id,
 
-            'title'      =>
-            'Electrical Work',
+            'title' => 'Electrical Work',
 
-            'status'     =>
-            'todo',
+            'status' => 'todo',
 
-            'priority'   =>
-            'high',
+            'priority' => 'high',
         ]);
 
         $task
@@ -242,7 +236,7 @@ class ProjectDetailTest extends TestCase
          * bagian dari overview project.
          */
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->has('tasks', 1)
                 ->where(
                     'tasks.0.id',
@@ -286,26 +280,21 @@ class ProjectDetailTest extends TestCase
         ]);
 
         $project = Project::create([
-            'name'       => 'Wedding Event',
-            'status'     => 'active',
+            'name' => 'Wedding Event',
+            'status' => 'active',
             'created_by' => $creator->id,
         ]);
 
         $task = Task::create([
-            'project_id' =>
-            $project->id,
+            'project_id' => $project->id,
 
-            'created_by' =>
-            $creator->id,
+            'created_by' => $creator->id,
 
-            'title'      =>
-            'Setup Lighting',
+            'title' => 'Setup Lighting',
 
-            'status'     =>
-            'todo',
+            'status' => 'todo',
 
-            'priority'   =>
-            'high',
+            'priority' => 'high',
         ]);
 
         $task
@@ -349,17 +338,17 @@ class ProjectDetailTest extends TestCase
         ]);
 
         $project = Project::create([
-            'name'       => 'Wedding Event',
-            'status'     => 'active',
+            'name' => 'Wedding Event',
+            'status' => 'active',
             'created_by' => $creator->id,
         ]);
 
         $task = Task::create([
             'project_id' => $project->id,
             'created_by' => $creator->id,
-            'title'      => 'Setup Lighting',
-            'status'     => 'todo',
-            'priority'   => 'high',
+            'title' => 'Setup Lighting',
+            'status' => 'todo',
+            'priority' => 'high',
         ]);
 
         $task->assignees()->attach(
@@ -378,7 +367,7 @@ class ProjectDetailTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where(
                     'project.id',
                     $project->id

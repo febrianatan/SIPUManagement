@@ -10,7 +10,7 @@ class ProjectPolicy
     public function before(
         User $user,
         string $ability
-    ): bool|null {
+    ): ?bool {
         if ($user->role === 'administrator') {
             return true;
         }

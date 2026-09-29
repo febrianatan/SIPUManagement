@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,19 +14,19 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
         ]);
 
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Admin SIPU',
             'email' => 'admin@example.com',
             'role' => 'administrator',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'password' => Hash::make('password'),
         ]);
 
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Staff Biasa',
             'email' => 'staff@example.com',
             'role' => 'staff',
             'department_id' => 1,
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'password' => Hash::make('password'),
         ]);
     }
 }

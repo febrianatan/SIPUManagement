@@ -11,7 +11,7 @@ class StoreTaskAttachmentRequest extends FormRequest
     {
         $task = $this->route('task');
 
-        if (!$task instanceof Task) {
+        if (! $task instanceof Task) {
             return false;
         }
 
@@ -53,14 +53,11 @@ class StoreTaskAttachmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'file.required' =>
-                'File attachment wajib dipilih.',
+            'file.required' => 'File attachment wajib dipilih.',
 
-            'file.max' =>
-                'Ukuran attachment maksimal 20 MB.',
+            'file.max' => 'Ukuran attachment maksimal 20 MB.',
 
-            'file.mimes' =>
-                'Format file tidak didukung.',
+            'file.mimes' => 'Format file tidak didukung.',
         ];
     }
 }

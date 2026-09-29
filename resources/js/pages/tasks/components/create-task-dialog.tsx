@@ -16,26 +16,15 @@ interface Props {
     defaultProjectId?: number | null;
 }
 
-interface TaskDialogForm {
-    [key: string]: any;
-    title: string;
-    description: string;
-    priority: Task['priority'];
-    due_at: string;
-    project_id: string;
-    requires_review: boolean;
-    assignee_ids: number[];
-}
-
 export function CreateTaskDialog({ open, onOpenChange, projects, users, defaultProjectId }: Props) {
-    const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm<TaskDialogForm>({
+    const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm({
         title: '',
         description: '',
-        priority: 'medium',
+        priority: 'medium' as Task['priority'],
         due_at: '',
         project_id: defaultProjectId ? defaultProjectId.toString() : 'none',
-        requires_review: false,
-        assignee_ids: [],
+        requires_review: false as boolean,
+        assignee_ids: [] as number[],
     });
 
     const handleSubmit: FormEventHandler = (e) => {

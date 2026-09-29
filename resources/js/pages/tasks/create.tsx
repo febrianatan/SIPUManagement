@@ -25,28 +25,17 @@ interface Props {
     formData: TaskFormData;
 }
 
-interface TaskCreateForm {
-    [key: string]: any;
-    title: string;
-    description: string;
-    priority: Task['priority'];
-    due_at: string;
-    project_id: string;
-    requires_review: boolean;
-    assignee_ids: number[];
-}
-
 export default function TaskCreate({ formData }: Props) {
-    const { projects = [], assignees = [], options } = formData;
+    const { projects = [], assignees = [] } = formData;
 
-    const { data, setData, post, processing, errors, transform } = useForm<TaskCreateForm>({
+    const { data, setData, post, processing, errors, transform } = useForm({
         title: '',
         description: '',
-        priority: 'medium',
+        priority: 'medium' as Task['priority'],
         due_at: '',
         project_id: 'none',
-        requires_review: false,
-        assignee_ids: [],
+        requires_review: false as boolean,
+        assignee_ids: [] as number[],
     });
 
     const handleSubmit: FormEventHandler = (e) => {

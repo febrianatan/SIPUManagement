@@ -90,14 +90,11 @@ class TaskFormService
     public function forUser(User $user): array
     {
         return [
-            'projects' =>
-                $this->projectsFor($user),
+            'projects' => $this->projectsFor($user),
 
-            'assignees' =>
-                $this->assignees(),
+            'assignees' => $this->assignees(),
 
-            'options' =>
-                $this->options(),
+            'options' => $this->options(),
         ];
     }
 }

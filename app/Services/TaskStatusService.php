@@ -37,9 +37,9 @@ class TaskStatusService
          * tidak punya transition.
          */
         if (
-            !$isAdministrator
-            && !$isCreator
-            && !$isAssignee
+            ! $isAdministrator
+            && ! $isCreator
+            && ! $isAssignee
         ) {
             return [];
         }
@@ -50,8 +50,8 @@ class TaskStatusService
          * Creator dan Administrator tidak perlu.
          */
         if (
-            !$isAdministrator
-            && !$isCreator
+            ! $isAdministrator
+            && ! $isCreator
             && $isAssignee
             && $assignee->pivot->acknowledged_at === null
         ) {
@@ -106,25 +106,24 @@ class TaskStatusService
          * tetapi service tetap melindungi dirinya.
          */
         if (
-            !$isAdministrator
-            && !$isCreator
-            && !$isAssignee
+            ! $isAdministrator
+            && ! $isCreator
+            && ! $isAssignee
         ) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         /*
          * Assignee belum acknowledge.
          */
         if (
-            !$isAdministrator
-            && !$isCreator
+            ! $isAdministrator
+            && ! $isCreator
             && $isAssignee
             && $assignee->pivot->acknowledged_at === null
         ) {
             throw ValidationException::withMessages([
-                'status' =>
-                    'Task harus di-acknowledge terlebih dahulu sebelum status dapat diubah.',
+                'status' => 'Task harus di-acknowledge terlebih dahulu sebelum status dapat diubah.',
             ]);
         }
 
@@ -135,19 +134,18 @@ class TaskStatusService
             );
 
         if (
-            !in_array(
+            ! in_array(
                 $newStatus,
                 $allowedStatuses,
                 true
             )
         ) {
             throw ValidationException::withMessages([
-                'status' =>
-                    'Perubahan status dari '
-                    . $this->statusLabel($oldStatus)
-                    . ' ke '
-                    . $this->statusLabel($newStatus)
-                    . ' tidak diizinkan.',
+                'status' => 'Perubahan status dari '
+                    .$this->statusLabel($oldStatus)
+                    .' ke '
+                    .$this->statusLabel($newStatus)
+                    .' tidak diizinkan.',
             ]);
         }
 
@@ -190,7 +188,7 @@ class TaskStatusService
          *   ↓
          * Done
          */
-        if (!$task->requires_review) {
+        if (! $task->requires_review) {
             if ($canApprove) {
                 return [
                     'todo' => [
@@ -285,20 +283,15 @@ class TaskStatusService
         string $status
     ): string {
         return match ($status) {
-            'todo' =>
-                'To Do',
+            'todo' => 'To Do',
 
-            'in_progress' =>
-                'In Progress',
+            'in_progress' => 'In Progress',
 
-            'review' =>
-                'Review',
+            'review' => 'Review',
 
-            'done' =>
-                'Done',
+            'done' => 'Done',
 
-            default =>
-                $status,
+            default => $status,
         };
     }
 }

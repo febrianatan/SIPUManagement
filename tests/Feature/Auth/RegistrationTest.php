@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\User;
-
 test('registration screen is disabled', function () {
     $response = $this->get('/register');
 

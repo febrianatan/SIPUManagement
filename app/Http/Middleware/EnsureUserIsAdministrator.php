@@ -10,7 +10,7 @@ class EnsureUserIsAdministrator
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || $request->user()->role !== 'administrator') {
+        if (! $request->user() || $request->user()->role !== 'administrator') {
             abort(403);
         }
 

@@ -86,8 +86,7 @@ class TaskWorkflowStateTest extends TestCase
         $task->assignees()->attach(
             $assignee->id,
             [
-                'acknowledged_at' =>
-                    now(),
+                'acknowledged_at' => now(),
             ]
         );
 
@@ -144,8 +143,7 @@ class TaskWorkflowStateTest extends TestCase
         $task->assignees()->attach(
             $assignee->id,
             [
-                'acknowledged_at' =>
-                    now(),
+                'acknowledged_at' => now(),
             ]
         );
 
@@ -198,8 +196,7 @@ class TaskWorkflowStateTest extends TestCase
         $task->assignees()->attach(
             $assignee->id,
             [
-                'acknowledged_at' =>
-                    now(),
+                'acknowledged_at' => now(),
             ]
         );
 
@@ -248,8 +245,7 @@ class TaskWorkflowStateTest extends TestCase
         $task->assignees()->attach(
             $assignee->id,
             [
-                'acknowledged_at' =>
-                    now(),
+                'acknowledged_at' => now(),
             ]
         );
 
@@ -310,8 +306,7 @@ class TaskWorkflowStateTest extends TestCase
         $task->assignees()->attach(
             $assignee->id,
             [
-                'acknowledged_at' =>
-                    now(),
+                'acknowledged_at' => now(),
             ]
         );
 

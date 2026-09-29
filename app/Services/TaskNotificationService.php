@@ -74,24 +74,21 @@ class TaskNotificationService
             /*
              * Angka total untuk badge bell.
              */
-            'total_count' =>
-                $pendingAssignmentsCount
+            'total_count' => $pendingAssignmentsCount
                 + $waitingReviewsCount,
 
             /*
              * Assignment baru.
              */
-            'pending_assignments_count' =>
-                $pendingAssignmentsCount,
+            'pending_assignments_count' => $pendingAssignmentsCount,
 
-            'pending_assignments' =>
-                (clone $pendingAssignmentsQuery)
-                    ->with([
-                        'creator:id,name,email',
-                        'project:id,name',
-                    ])
-                    ->orderByRaw(
-                        "
+            'pending_assignments' => (clone $pendingAssignmentsQuery)
+                ->with([
+                    'creator:id,name,email',
+                    'project:id,name',
+                ])
+                ->orderByRaw(
+                    "
                         CASE priority
                             WHEN 'urgent' THEN 1
                             WHEN 'high' THEN 2
@@ -100,44 +97,42 @@ class TaskNotificationService
                             ELSE 5
                         END
                         "
-                    )
-                    ->orderByDesc(
-                        'created_at'
-                    )
-                    ->limit(5)
-                    ->get([
-                        'id',
-                        'project_id',
-                        'created_by',
-                        'title',
-                        'status',
-                        'priority',
-                        'due_at',
-                        'requires_review',
-                        'created_at',
-                    ]),
+                )
+                ->orderByDesc(
+                    'created_at'
+                )
+                ->limit(5)
+                ->get([
+                    'id',
+                    'project_id',
+                    'created_by',
+                    'title',
+                    'status',
+                    'priority',
+                    'due_at',
+                    'requires_review',
+                    'created_at',
+                ]),
 
             /*
              * Task yang menunggu approval creator.
              */
-            'waiting_reviews_count' =>
-                $waitingReviewsCount,
+            'waiting_reviews_count' => $waitingReviewsCount,
 
-            'waiting_reviews' =>
-                (clone $waitingReviewsQuery)
-                    ->with([
-                        'project:id,name',
+            'waiting_reviews' => (clone $waitingReviewsQuery)
+                ->with([
+                    'project:id,name',
 
-                        'assignees' => function ($query) {
-                            $query->select(
-                                'users.id',
-                                'users.name',
-                                'users.email'
-                            );
-                        },
-                    ])
-                    ->orderByRaw(
-                        "
+                    'assignees' => function ($query) {
+                        $query->select(
+                            'users.id',
+                            'users.name',
+                            'users.email'
+                        );
+                    },
+                ])
+                ->orderByRaw(
+                    "
                         CASE priority
                             WHEN 'urgent' THEN 1
                             WHEN 'high' THEN 2
@@ -146,34 +141,34 @@ class TaskNotificationService
                             ELSE 5
                         END
                         "
-                    )
-                    ->orderByRaw(
-                        '
+                )
+                ->orderByRaw(
+                    '
                         CASE
                             WHEN due_at IS NULL
                             THEN 1
                             ELSE 0
                         END
                         '
-                    )
-                    ->orderBy(
-                        'due_at'
-                    )
-                    ->orderByDesc(
-                        'updated_at'
-                    )
-                    ->limit(5)
-                    ->get([
-                        'id',
-                        'project_id',
-                        'created_by',
-                        'title',
-                        'status',
-                        'priority',
-                        'due_at',
-                        'requires_review',
-                        'updated_at',
-                    ]),
+                )
+                ->orderBy(
+                    'due_at'
+                )
+                ->orderByDesc(
+                    'updated_at'
+                )
+                ->limit(5)
+                ->get([
+                    'id',
+                    'project_id',
+                    'created_by',
+                    'title',
+                    'status',
+                    'priority',
+                    'due_at',
+                    'requires_review',
+                    'updated_at',
+                ]),
         ];
     }
 

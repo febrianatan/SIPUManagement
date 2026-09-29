@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -14,13 +15,13 @@ class TaskIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search'          => [
+            'search' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
 
-            'status'          => [
+            'status' => [
                 'nullable',
                 Rule::in([
                     'todo',
@@ -30,7 +31,7 @@ class TaskIndexRequest extends FormRequest
                 ]),
             ],
 
-            'priority'        => [
+            'priority' => [
                 'nullable',
                 Rule::in([
                     'low',
@@ -40,13 +41,13 @@ class TaskIndexRequest extends FormRequest
                 ]),
             ],
 
-            'project_id'      => [
+            'project_id' => [
                 'nullable',
                 'integer',
                 'exists:projects,id',
             ],
 
-            'assignee_id'     => [
+            'assignee_id' => [
                 'nullable',
                 'integer',
                 'exists:users,id',
@@ -60,13 +61,13 @@ class TaskIndexRequest extends FormRequest
                 ]),
             ],
 
-            'created_by'      => [
+            'created_by' => [
                 'nullable',
                 'integer',
                 'exists:users,id',
             ],
 
-            'due'             => [
+            'due' => [
                 'nullable',
                 Rule::in([
                     'overdue',
@@ -76,7 +77,7 @@ class TaskIndexRequest extends FormRequest
                 ]),
             ],
 
-            'per_page'        => [
+            'per_page' => [
                 'nullable',
                 'integer',
                 Rule::in([

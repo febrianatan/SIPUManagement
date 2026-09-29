@@ -18,7 +18,7 @@ interface Props {
 export function EditProjectDialog({ open, onOpenChange, project, departments }: Props) {
     const initialDeptIds = project.departments ? project.departments.map((d) => d.id) : [];
 
-    const { data, setData, patch, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, patch, processing, errors } = useForm({
         name: project.name || '',
         description: project.description || '',
         status: (project.status || 'active') as 'active' | 'completed' | 'archived',
@@ -38,7 +38,7 @@ export function EditProjectDialog({ open, onOpenChange, project, departments }: 
                 department_ids: project.departments ? project.departments.map((d) => d.id) : [],
             });
         }
-    }, [open, project]);
+    }, [open, project, setData]);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();

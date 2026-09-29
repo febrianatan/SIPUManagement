@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests;
 
 use App\Models\Task;
@@ -21,23 +22,23 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project_id'      => [
+            'project_id' => [
                 'nullable',
                 'exists:projects,id',
             ],
 
-            'title'           => [
+            'title' => [
                 'required',
                 'string',
                 'max:255',
             ],
 
-            'description'     => [
+            'description' => [
                 'nullable',
                 'string',
             ],
 
-            'priority'        => [
+            'priority' => [
                 'required',
                 Rule::in([
                     'low',
@@ -47,18 +48,18 @@ class UpdateTaskRequest extends FormRequest
                 ]),
             ],
 
-            'due_at'          => [
+            'due_at' => [
                 'nullable',
                 'date',
             ],
 
-            'assignee_ids'    => [
+            'assignee_ids' => [
                 'required',
                 'array',
                 'min:1',
             ],
 
-            'assignee_ids.*'  => [
+            'assignee_ids.*' => [
                 'integer',
                 'distinct',
                 'exists:users,id',

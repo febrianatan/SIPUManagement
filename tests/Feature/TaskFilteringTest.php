@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature;
 
 use App\Models\Project;
@@ -27,9 +28,9 @@ class TaskFilteringTest extends TestCase
      */
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Created By Me',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Created By Me',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         /*
@@ -39,9 +40,9 @@ class TaskFilteringTest extends TestCase
      */
         $assignedTask = Task::create([
             'created_by' => $otherUser->id,
-            'title'      => 'Assigned To Me',
-            'status'     => 'todo',
-            'priority'   => 'high',
+            'title' => 'Assigned To Me',
+            'status' => 'todo',
+            'priority' => 'high',
         ]);
 
         $assignedTask
@@ -55,9 +56,9 @@ class TaskFilteringTest extends TestCase
      */
         Task::create([
             'created_by' => $otherUser->id,
-            'title'      => 'Unrelated Task',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Unrelated Task',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $response = $this
@@ -67,7 +68,7 @@ class TaskFilteringTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where('tasks.total', 2)
                 ->has('tasks.data', 2)
         );
@@ -81,16 +82,16 @@ class TaskFilteringTest extends TestCase
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Perbaiki Printer Front Office',
-            'status'     => 'todo',
-            'priority'   => 'high',
+            'title' => 'Perbaiki Printer Front Office',
+            'status' => 'todo',
+            'priority' => 'high',
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Check Network Ballroom',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Check Network Ballroom',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $response = $this
@@ -102,7 +103,7 @@ class TaskFilteringTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where('tasks.total', 1)
                 ->where(
                     'tasks.data.0.title',
@@ -123,36 +124,36 @@ class TaskFilteringTest extends TestCase
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Urgent Progress',
-            'status'     => 'in_progress',
-            'priority'   => 'urgent',
+            'title' => 'Urgent Progress',
+            'status' => 'in_progress',
+            'priority' => 'urgent',
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Urgent Todo',
-            'status'     => 'todo',
-            'priority'   => 'urgent',
+            'title' => 'Urgent Todo',
+            'status' => 'todo',
+            'priority' => 'urgent',
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Normal Progress',
-            'status'     => 'in_progress',
-            'priority'   => 'medium',
+            'title' => 'Normal Progress',
+            'status' => 'in_progress',
+            'priority' => 'medium',
         ]);
 
         $response = $this
             ->actingAs($user)
             ->get(route('tasks.index', [
-                'status'   => 'in_progress',
+                'status' => 'in_progress',
                 'priority' => 'urgent',
             ]));
 
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where('tasks.total', 1)
                 ->where(
                     'tasks.data.0.title',
@@ -176,25 +177,25 @@ class TaskFilteringTest extends TestCase
         ]);
 
         $project = Project::create([
-            'name'       => 'Wedding Event',
-            'status'     => 'active',
+            'name' => 'Wedding Event',
+            'status' => 'active',
             'created_by' => $user->id,
         ]);
 
         Task::create([
             'project_id' => $project->id,
             'created_by' => $user->id,
-            'title'      => 'Wedding Task',
-            'status'     => 'todo',
-            'priority'   => 'high',
+            'title' => 'Wedding Task',
+            'status' => 'todo',
+            'priority' => 'high',
         ]);
 
         Task::create([
             'project_id' => null,
             'created_by' => $user->id,
-            'title'      => 'General Task',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'General Task',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $response = $this
@@ -206,7 +207,7 @@ class TaskFilteringTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where('tasks.total', 1)
                 ->where(
                     'tasks.data.0.title',
@@ -231,16 +232,16 @@ class TaskFilteringTest extends TestCase
 
         $taskA = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Task Albert',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Task Albert',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $taskB = Task::create([
             'created_by' => $creator->id,
-            'title'      => 'Task Budi',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Task Budi',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         $taskA->assignees()->attach(
@@ -260,7 +261,7 @@ class TaskFilteringTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where('tasks.total', 1)
                 ->where(
                     'tasks.data.0.id',
@@ -277,26 +278,26 @@ class TaskFilteringTest extends TestCase
 
         $overdue = Task::create([
             'created_by' => $user->id,
-            'title'      => 'Overdue Task',
-            'status'     => 'in_progress',
-            'priority'   => 'high',
-            'due_at'     => now()->subHour(),
+            'title' => 'Overdue Task',
+            'status' => 'in_progress',
+            'priority' => 'high',
+            'due_at' => now()->subHour(),
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Future Task',
-            'status'     => 'todo',
-            'priority'   => 'medium',
-            'due_at'     => now()->addDay(),
+            'title' => 'Future Task',
+            'status' => 'todo',
+            'priority' => 'medium',
+            'due_at' => now()->addDay(),
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Finished Overdue Task',
-            'status'     => 'done',
-            'priority'   => 'medium',
-            'due_at'     => now()->subDay(),
+            'title' => 'Finished Overdue Task',
+            'status' => 'done',
+            'priority' => 'medium',
+            'due_at' => now()->subDay(),
         ]);
 
         $response = $this
@@ -308,7 +309,7 @@ class TaskFilteringTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where('tasks.total', 1)
                 ->where(
                     'tasks.data.0.id',
@@ -326,9 +327,9 @@ class TaskFilteringTest extends TestCase
         for ($i = 1; $i <= 25; $i++) {
             Task::create([
                 'created_by' => $user->id,
-                'title'      => 'Task ' . $i,
-                'status'     => 'todo',
-                'priority'   => 'medium',
+                'title' => 'Task '.$i,
+                'status' => 'todo',
+                'priority' => 'medium',
             ]);
         }
 
@@ -339,7 +340,7 @@ class TaskFilteringTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where('tasks.total', 25)
                 ->where('tasks.per_page', 20)
                 ->has('tasks.data', 20)
@@ -354,37 +355,37 @@ class TaskFilteringTest extends TestCase
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Todo A',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Todo A',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Todo B',
-            'status'     => 'todo',
-            'priority'   => 'medium',
+            'title' => 'Todo B',
+            'status' => 'todo',
+            'priority' => 'medium',
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Progress',
-            'status'     => 'in_progress',
-            'priority'   => 'high',
+            'title' => 'Progress',
+            'status' => 'in_progress',
+            'priority' => 'high',
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Review',
-            'status'     => 'review',
-            'priority'   => 'medium',
+            'title' => 'Review',
+            'status' => 'review',
+            'priority' => 'medium',
         ]);
 
         Task::create([
             'created_by' => $user->id,
-            'title'      => 'Done',
-            'status'     => 'done',
-            'priority'   => 'low',
+            'title' => 'Done',
+            'status' => 'done',
+            'priority' => 'low',
         ]);
 
         $response = $this
@@ -394,7 +395,7 @@ class TaskFilteringTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->where(
                     'statusCounts.todo',
                     2

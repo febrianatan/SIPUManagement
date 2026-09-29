@@ -40,8 +40,7 @@ class TaskReviewWorkflowTest extends TestCase
                     $task
                 ),
                 [
-                    'status' =>
-                        'in_progress',
+                    'status' => 'in_progress',
                 ]
             );
 
@@ -91,8 +90,7 @@ class TaskReviewWorkflowTest extends TestCase
                     $task
                 ),
                 [
-                    'status' =>
-                        'in_progress',
+                    'status' => 'in_progress',
                 ]
             )
             ->assertSessionHasNoErrors();
@@ -105,8 +103,7 @@ class TaskReviewWorkflowTest extends TestCase
                     $task
                 ),
                 [
-                    'status' =>
-                        'done',
+                    'status' => 'done',
                 ]
             )
             ->assertSessionHasNoErrors();
@@ -299,8 +296,7 @@ class TaskReviewWorkflowTest extends TestCase
                     $task
                 ),
                 [
-                    'status' =>
-                        'in_progress',
+                    'status' => 'in_progress',
                 ]
             );
 

@@ -81,11 +81,11 @@ class Task extends Model
         array $metadata = []
     ): TaskActivity {
         return $this->activities()->create([
-            'actor_id'   => $actor?->id,
+            'actor_id' => $actor?->id,
             'actor_name' => $actor?->name,
-            'action'     => $action,
+            'action' => $action,
 
-            'metadata'   => empty($metadata)
+            'metadata' => empty($metadata)
                 ? null
                 : $metadata,
         ]);
@@ -143,7 +143,7 @@ class Task extends Model
             return $query;
         }
 
-        $keyword = '%' . strtolower($search) . '%';
+        $keyword = '%'.strtolower($search).'%';
 
         return $query->where(function ($query) use ($keyword) {
             $query
@@ -242,12 +242,12 @@ class Task extends Model
         }
 
         return match ($due) {
-            'overdue'  => $query
+            'overdue' => $query
                 ->whereNotNull('due_at')
                 ->where('due_at', '<', now())
                 ->where('status', '!=', 'done'),
 
-            'today'    => $query
+            'today' => $query
                 ->whereBetween(
                     'due_at',
                     [
@@ -260,10 +260,10 @@ class Task extends Model
                 ->whereNotNull('due_at')
                 ->where('due_at', '>', now()),
 
-            'no_due'   => $query
+            'no_due' => $query
                 ->whereNull('due_at'),
 
-            default    => $query,
+            default => $query,
         };
     }
 

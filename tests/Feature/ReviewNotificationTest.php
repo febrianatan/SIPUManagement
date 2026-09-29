@@ -22,20 +22,15 @@ class ReviewNotificationTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Daily Revenue Report',
+            'title' => 'Daily Revenue Report',
 
-            'status' =>
-                'review',
+            'status' => 'review',
 
-            'priority' =>
-                'high',
+            'priority' => 'high',
 
-            'requires_review' =>
-                true,
+            'requires_review' => true,
         ]);
 
         $task->assignees()->attach(
@@ -81,20 +76,15 @@ class ReviewNotificationTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Monthly Report',
+            'title' => 'Monthly Report',
 
-            'status' =>
-                'review',
+            'status' => 'review',
 
-            'priority' =>
-                'medium',
+            'priority' => 'medium',
 
-            'requires_review' =>
-                true,
+            'requires_review' => true,
         ]);
 
         $task->assignees()->attach(
@@ -132,20 +122,15 @@ class ReviewNotificationTest extends TestCase
         ]);
 
         Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Legacy Review Task',
+            'title' => 'Legacy Review Task',
 
-            'status' =>
-                'review',
+            'status' => 'review',
 
-            'priority' =>
-                'medium',
+            'priority' => 'medium',
 
-            'requires_review' =>
-                false,
+            'requires_review' => false,
         ]);
 
         $response = $this
@@ -176,20 +161,15 @@ class ReviewNotificationTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Revenue Report',
+            'title' => 'Revenue Report',
 
-            'status' =>
-                'review',
+            'status' => 'review',
 
-            'priority' =>
-                'high',
+            'priority' => 'high',
 
-            'requires_review' =>
-                true,
+            'requires_review' => true,
         ]);
 
         $task->assignees()->attach(
@@ -259,20 +239,15 @@ class ReviewNotificationTest extends TestCase
         ]);
 
         $task = Task::create([
-            'created_by' =>
-                $creator->id,
+            'created_by' => $creator->id,
 
-            'title' =>
-                'Financial Report',
+            'title' => 'Financial Report',
 
-            'status' =>
-                'review',
+            'status' => 'review',
 
-            'priority' =>
-                'high',
+            'priority' => 'high',
 
-            'requires_review' =>
-                true,
+            'requires_review' => true,
         ]);
 
         $task->assignees()->attach(
@@ -290,8 +265,7 @@ class ReviewNotificationTest extends TestCase
                     $task
                 ),
                 [
-                    'status' =>
-                        'in_progress',
+                    'status' => 'in_progress',
                 ]
             )
             ->assertSessionHasNoErrors();
@@ -326,20 +300,15 @@ class ReviewNotificationTest extends TestCase
          * assignment baru untuk user.
          */
         $assignedTask = Task::create([
-            'created_by' =>
-                $otherUser->id,
+            'created_by' => $otherUser->id,
 
-            'title' =>
-                'Fix Front Office PC',
+            'title' => 'Fix Front Office PC',
 
-            'status' =>
-                'todo',
+            'status' => 'todo',
 
-            'priority' =>
-                'urgent',
+            'priority' => 'urgent',
 
-            'requires_review' =>
-                false,
+            'requires_review' => false,
         ]);
 
         $assignedTask
@@ -353,20 +322,15 @@ class ReviewNotificationTest extends TestCase
          * task milik user sedang menunggu review.
          */
         $reviewTask = Task::create([
-            'created_by' =>
-                $user->id,
+            'created_by' => $user->id,
 
-            'title' =>
-                'Check Daily Report',
+            'title' => 'Check Daily Report',
 
-            'status' =>
-                'review',
+            'status' => 'review',
 
-            'priority' =>
-                'high',
+            'priority' => 'high',
 
-            'requires_review' =>
-                true,
+            'requires_review' => true,
         ]);
 
         $reviewTask
