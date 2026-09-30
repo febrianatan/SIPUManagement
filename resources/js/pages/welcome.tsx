@@ -1,3 +1,4 @@
+import AppearanceToggleDropdown from '@/components/appearance-dropdown';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -45,17 +46,19 @@ export default function Welcome() {
         <>
             <Head title="SIPU - Sistem Informasi Pengelolaan Unit Swiss-Belinn SKA Pekanbaru" />
 
-            <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900 antialiased selection:bg-red-500 selection:text-white dark:bg-neutral-950 dark:text-neutral-100">
+            <div className="relative min-h-screen overflow-hidden bg-white text-slate-900 antialiased selection:bg-red-500 selection:text-white dark:bg-neutral-950 dark:text-neutral-100">
                 {/* Background Ambient Glows */}
-                <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[1000px] -translate-x-1/2 bg-gradient-to-tr from-red-600/15 via-amber-500/10 to-transparent opacity-70 blur-3xl" />
-                <div className="pointer-events-none absolute top-1/2 -right-40 h-[600px] w-[600px] rounded-full bg-red-600/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-20 -left-20 h-[500px] w-[500px] rounded-full bg-amber-500/10 blur-3xl" />
+                <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[1000px] -translate-x-1/2 bg-gradient-to-tr from-red-600/10 via-amber-500/5 to-transparent opacity-70 blur-3xl dark:from-red-600/15 dark:via-amber-500/10" />
+                <div className="pointer-events-none absolute top-1/2 -right-40 h-[600px] w-[600px] rounded-full bg-red-600/5 blur-3xl dark:bg-red-600/10" />
+                <div className="pointer-events-none absolute -bottom-20 -left-20 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-3xl dark:bg-amber-500/10" />
 
                 {/* Navigation Bar */}
                 <header className="relative z-10 mx-auto max-w-7xl px-6 py-6 sm:px-8">
-                    <nav className="flex items-center justify-between rounded-2xl border border-white/60 bg-white/70 px-6 py-3.5 shadow-xs backdrop-blur-md dark:border-neutral-800/80 dark:bg-neutral-900/70">
+                    <nav className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/80 px-6 py-3.5 shadow-xs backdrop-blur-md dark:border-neutral-800/80 dark:bg-neutral-900/70">
                         <div className="flex items-center gap-3">
-                            <AppLogoIcon className="size-9" />
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-white p-1 shadow-xs dark:bg-neutral-900">
+                                <AppLogoIcon className="size-full object-contain" />
+                            </div>
                             <div>
                                 <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
                                     SIPU<span className="text-red-600 dark:text-red-500">Management</span>
@@ -67,7 +70,9 @@ export default function Welcome() {
                         </div>
 
                         <div className="flex items-center gap-3">
-                            {auth.user ? (
+                            <AppearanceToggleDropdown />
+
+                            {auth?.user ? (
                                 <Link
                                     href={route('dashboard')}
                                     className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.98]"
@@ -76,27 +81,20 @@ export default function Welcome() {
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                             ) : (
-                                <>
-                                    <Link
-                                        href={route('login')}
-                                        className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100/80 hover:text-slate-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
-                                    >
-                                        Masuk
-                                    </Link>
-                                    <Link
-                                        href={route('register')}
-                                        className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.98]"
-                                    >
-                                        Daftar Staf
-                                    </Link>
-                                </>
+                                <Link
+                                    href={route('login')}
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.98]"
+                                >
+                                    Masuk ke Sistem
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
                             )}
                         </div>
                     </nav>
                 </header>
 
                 {/* Hero Section */}
-                <main className="relative z-10 mx-auto max-w-7xl px-6 pt-12 pb-24 sm:px-8 lg:pt-20">
+                <main className="relative z-10 mx-auto max-w-7xl px-6 pt-12 pb-24 sm:px-8 lg:pt-16">
                     <div className="mx-auto flex max-w-3xl flex-col items-center space-y-6 text-center">
                         {/* Pill Badge */}
                         <div className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-1.5 text-xs font-semibold text-red-600 backdrop-blur-xs dark:text-red-400">
@@ -120,7 +118,7 @@ export default function Welcome() {
 
                         {/* Action Buttons */}
                         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                            {auth.user ? (
+                            {auth?.user ? (
                                 <Link
                                     href={route('dashboard')}
                                     className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-7 py-3 text-base font-semibold text-white shadow-lg shadow-red-600/25 transition-all hover:scale-[1.02] hover:bg-red-700 active:scale-[0.98]"
@@ -129,21 +127,21 @@ export default function Welcome() {
                                     <ArrowRight className="h-5 w-5" />
                                 </Link>
                             ) : (
-                                <>
+                                <div className="flex flex-wrap items-center justify-center gap-3">
                                     <Link
                                         href={route('login')}
                                         className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-7 py-3 text-base font-semibold text-white shadow-lg shadow-red-600/25 transition-all hover:scale-[1.02] hover:bg-red-700 active:scale-[0.98]"
                                     >
-                                        Masuk Akun Staf
+                                        Masuk ke Sistem (Login)
                                         <ArrowRight className="h-5 w-5" />
                                     </Link>
-                                    <Link
-                                        href={route('register')}
-                                        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white/80 px-6 py-3 text-base font-medium text-slate-800 shadow-xs transition-all hover:border-slate-400 hover:bg-white dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                                    <a
+                                        href="#fitur"
+                                        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white/90 px-6 py-3 text-base font-medium text-slate-700 shadow-xs transition-all hover:border-slate-400 hover:bg-white dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-200 dark:hover:bg-neutral-800"
                                     >
-                                        Registrasi Staf Baru
-                                    </Link>
-                                </>
+                                        Pelajari Fitur
+                                    </a>
+                                </div>
                             )}
                         </div>
 
@@ -216,7 +214,7 @@ export default function Welcome() {
                     </div>
 
                     {/* Features Section */}
-                    <div className="mt-28">
+                    <div id="fitur" className="mt-28 scroll-mt-10">
                         <div className="mx-auto mb-16 max-w-2xl space-y-3 text-center">
                             <h2 className="text-xs font-bold tracking-widest text-red-600 uppercase dark:text-red-400">Fitur Utama Sistem</h2>
                             <p className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
@@ -258,7 +256,7 @@ export default function Welcome() {
                 </main>
 
                 {/* Footer */}
-                <footer className="relative border-t border-slate-200/60 bg-white/40 backdrop-blur-md dark:border-neutral-800/80 dark:bg-neutral-950/60">
+                <footer className="relative border-t border-slate-200/60 bg-white/60 backdrop-blur-md dark:border-neutral-800/80 dark:bg-neutral-950/60">
                     <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-10 text-xs text-slate-500 sm:flex-row sm:px-8 dark:text-neutral-400">
                         <div className="flex items-center gap-2">
                             <Hotel className="h-4 w-4 text-red-600 dark:text-red-500" />

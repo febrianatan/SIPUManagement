@@ -296,4 +296,29 @@ class TaskManagementTest extends TestCase
             'status' => 'in_progress',
         ]);
     }
+
+    public function test_creator_can_delete_task_and_redirects_to_tasks_index(): void
+    {
+        $creator = User::factory()->create([
+            'role' => 'staff',
+        ]);
+
+        $task = Task::create([
+            'created_by' => $creator->id,
+            'title' => 'Task to Delete',
+            'status' => 'todo',
+            'priority' => 'medium',
+        ]);
+
+        $response = $this
+            ->actingAs($creator)
+            ->delete(route('tasks.destroy', $task));
+
+        $response->assertRedirect(route('tasks.index'));
+        $response->assertSessionHas('success', 'Task berhasil dihapus.');
+
+        $this->assertDatabaseMissing('tasks', [
+            'id' => $task->id,
+        ]);
+    }
 }

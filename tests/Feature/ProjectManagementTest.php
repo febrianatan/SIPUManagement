@@ -222,4 +222,28 @@ class ProjectManagementTest extends TestCase
             'name' => 'Original Project',
         ]);
     }
+
+    public function test_creator_can_delete_project_and_redirects_to_projects_index(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'administrator',
+        ]);
+
+        $project = Project::create([
+            'name' => 'Project to Delete',
+            'status' => 'active',
+            'created_by' => $admin->id,
+        ]);
+
+        $response = $this
+            ->actingAs($admin)
+            ->delete(route('projects.destroy', $project));
+
+        $response->assertRedirect(route('projects.index'));
+        $response->assertSessionHas('success', 'Project berhasil dihapus.');
+
+        $this->assertDatabaseMissing('projects', [
+            'id' => $project->id,
+        ]);
+    }
 }

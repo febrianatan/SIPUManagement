@@ -779,10 +779,12 @@ class TaskController extends Controller
 
         $task->delete();
 
-        return back()->with(
-            'success',
-            'Task berhasil dihapus.'
-        );
+        return redirect()
+            ->route('tasks.index')
+            ->with(
+                'success',
+                'Task berhasil dihapus.'
+            );
     }
 
     private function authorizeProject(

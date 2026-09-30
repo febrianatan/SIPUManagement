@@ -6,6 +6,11 @@ import {
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+    server: {
+        watch: {
+            ignored: ['**/public/**', '**/storage/**'],
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],

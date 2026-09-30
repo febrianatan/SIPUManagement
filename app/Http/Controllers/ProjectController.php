@@ -360,9 +360,11 @@ class ProjectController extends Controller
 
         $project->delete();
 
-        return back()->with(
-            'success',
-            'Project berhasil dihapus.'
-        );
+        return redirect()
+            ->route('projects.index')
+            ->with(
+                'success',
+                'Project berhasil dihapus.'
+            );
     }
 }
